@@ -560,18 +560,6 @@ const TeacherPage = () => {
         {/* Navigation Buttons */}
         <div style={buttonContainerStyle}>
           <button
-            onClick={() => navigate("/add-student")}
-            style={buttonStyle}
-          >
-            Add Student
-          </button>
-          <button
-            onClick={() => navigate("/show-students-to-edit")}
-            style={buttonStyle}
-          >
-            Edit Student
-          </button>
-          <button
             onClick={() => navigate("/generate-seating")}
             style={buttonStyle}
           >
