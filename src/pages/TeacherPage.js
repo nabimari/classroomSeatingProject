@@ -535,6 +535,8 @@ import { useNavigate } from "react-router-dom";
 import { db } from "../firebase"; // Ensure Firebase is set up
 import { collection, getDocs } from "firebase/firestore";
 
+
+
 const TeacherPage = () => {
   const navigate = useNavigate();
   const [classes, setClasses] = useState([]);

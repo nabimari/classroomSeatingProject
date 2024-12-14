@@ -652,7 +652,7 @@ const App = () => {
         }}
       >
         <Router>
-          <Header /> {/* Modularized Header */}
+        <Header teacherName={currentUser?.displayName || "Teacher"} />
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Dashboard />} />
@@ -709,7 +709,7 @@ const App = () => {
               }
             />
             <Route
-              path="/questionnaire"
+              path="/questionnaire/:studentId"
               element={
                 <PrivateRoute>
                   <Questionnaire />

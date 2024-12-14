@@ -338,6 +338,7 @@ const ViewStudentsPage = () => {
 
 export default ViewStudentsPage;
 */
+/*
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { doc, getDoc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
@@ -625,6 +626,335 @@ const ViewStudentsPage = () => {
                   name="specialNeeds"
                   checked={newStudent.specialNeeds}
                   onChange={handleChange}
+                />
+                Special Needs
+              </label>
+              <button
+                type="submit"
+                style={{
+                  padding: "10px",
+                  backgroundColor: editingStudent ? "#4CAF50" : "#2196F3",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "5px",
+                  cursor: "pointer",
+                }}
+              >
+                {editingStudent ? "Save Changes" : "Add Student"}
+              </button>
+            </form>
+          </div>
+        </>
+      ) : (
+        <p>Loading class data...</p>
+      )}
+    </div>
+  );
+};
+
+export default ViewStudentsPage;
+*/
+import React, { useEffect, useState } from "react";
+import { db } from "../firebase";
+import { doc, getDoc, updateDoc, arrayUnion, arrayRemove, collection, addDoc } from "firebase/firestore";
+import { useParams } from "react-router-dom";
+
+const ViewStudentsPage = ({ teacherName }) => {
+  const { classId } = useParams();
+  const [classData, setClassData] = useState(null);
+  const [newStudent, setNewStudent] = useState({
+    name: "",
+    age: "",
+    academicLevel: "",
+    behavior: "",
+    specialNeeds: false,
+    language: "",
+  });
+  const [editingStudent, setEditingStudent] = useState(null);
+
+  // Fetch class data
+  useEffect(() => {
+    const fetchClassData = async () => {
+      try {
+        const classRef = doc(db, "Classes", classId);
+        const classSnapshot = await getDoc(classRef);
+        if (classSnapshot.exists()) {
+          setClassData({ id: classSnapshot.id, ...classSnapshot.data() });
+        }
+      } catch (err) {
+        console.error("Error fetching class data:", err.message);
+      }
+    };
+
+    fetchClassData();
+  }, [classId]);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    setNewStudent((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
+  };
+
+  const handleAddStudent = async (e) => {
+    e.preventDefault();
+
+    if (
+      !newStudent.name ||
+      !newStudent.age ||
+      !newStudent.academicLevel ||
+      !newStudent.behavior ||
+      !newStudent.language
+    ) {
+      alert("Please fill in all fields.");
+      return;
+    }
+
+    if (newStudent.age > 18) {
+      alert("Age must be 18 or below. This system is for school students only.");
+      return;
+    }
+
+    const newStudentObject = {
+      ...newStudent,
+      id: `${Date.now()}`,
+      classId,
+    };
+
+    try {
+      const studentRef = await addDoc(collection(db, "Students"), newStudentObject);
+
+      const classRef = doc(db, "Classes", classId);
+      await updateDoc(classRef, {
+        students: arrayUnion({ id: studentRef.id, ...newStudentObject }),
+      });
+
+      setClassData((prev) => ({
+        ...prev,
+        students: [...prev.students, { id: studentRef.id, ...newStudentObject }],
+      }));
+
+      setNewStudent({
+        name: "",
+        age: "",
+        academicLevel: "",
+        behavior: "",
+        specialNeeds: false,
+        language: "",
+      });
+      alert("Student added successfully!");
+    } catch (err) {
+      console.error("Error adding student:", err.message);
+    }
+  };
+
+  const handleDeleteStudent = async (student) => {
+    try {
+      const classRef = doc(db, "Classes", classId);
+      await updateDoc(classRef, {
+        students: arrayRemove(student),
+      });
+
+      setClassData((prev) => ({
+        ...prev,
+        students: prev.students.filter((s) => s.id !== student.id),
+      }));
+      alert("Student deleted successfully!");
+    } catch (err) {
+      console.error("Error deleting student:", err.message);
+    }
+  };
+
+  const handleEditStudent = (student) => {
+    setEditingStudent(student);
+    setNewStudent(student);
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
+
+    if (newStudent.age > 18) {
+      alert("Age must be 18 or below. This system is for school students only.");
+      return;
+    }
+
+    try {
+      const updatedStudents = classData.students.map((student) =>
+        student.id === editingStudent.id ? { ...newStudent } : student
+      );
+
+      const classRef = doc(db, "Classes", classId);
+      await updateDoc(classRef, { students: updatedStudents });
+
+      setClassData((prev) => ({ ...prev, students: updatedStudents }));
+      setEditingStudent(null);
+      setNewStudent({
+        name: "",
+        age: "",
+        academicLevel: "",
+        behavior: "",
+        specialNeeds: false,
+        language: "",
+      });
+      alert("Student updated successfully!");
+    } catch (err) {
+      console.error("Error updating student:", err.message);
+    }
+  };
+
+  return (
+    <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
+      {classData ? (
+        <>
+          <h2>
+            {classData.name} - {classData.students?.length || 0} Students
+          </h2>
+          {classData.students && classData.students.length > 0 ? (
+            <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "20px" }}>
+              <thead>
+                <tr style={{ backgroundColor: "#f2f2f2", textAlign: "left" }}>
+                  <th style={{ border: "1px solid #ddd", padding: "8px" }}>Name</th>
+                  <th style={{ border: "1px solid #ddd", padding: "8px" }}>Age</th>
+                  <th style={{ border: "1px solid #ddd", padding: "8px" }}>Academic Level</th>
+                  <th style={{ border: "1px solid #ddd", padding: "8px" }}>Behavior</th>
+                  <th style={{ border: "1px solid #ddd", padding: "8px" }}>Language</th>
+                  <th style={{ border: "1px solid #ddd", padding: "8px" }}>Special Needs</th>
+                  <th style={{ border: "1px solid #ddd", padding: "8px" }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {classData.students.map((student) => (
+                  <tr key={student.id}>
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>{student.name}</td>
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>{student.age}</td>
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>{student.academicLevel}</td>
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>{student.behavior}</td>
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>{student.language}</td>
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                      {student.specialNeeds ? "Yes" : "No"}
+                    </td>
+                    <td style={{ border: "1px solid #ddd", padding: "8px" }}>
+                      <button
+                        onClick={() => handleEditStudent(student)}
+                        style={{
+                          marginRight: "10px",
+                          padding: "5px 10px",
+                          backgroundColor: "#4CAF50",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => handleDeleteStudent(student)}
+                        style={{
+                          padding: "5px 10px",
+                          backgroundColor: "#f44336",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "5px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <p>No students found in this class.</p>
+          )}
+          <div style={{ marginTop: "20px", padding: "20px", border: "1px solid #ccc", borderRadius: "5px" }}>
+            <h3>{editingStudent ? "Edit Student" : "Add New Student"}</h3>
+            <form
+              onSubmit={editingStudent ? handleSaveEdit : handleAddStudent}
+              style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+            >
+              <input
+                type="text"
+                name="name"
+                placeholder="Name"
+                value={newStudent.name}
+                onChange={handleChange}
+                required
+                style={{
+                  padding: "10px",
+                  borderRadius: "5px",
+                  border: "1px solid #ccc",
+                  fontSize: "14px",
+                }}
+              />
+              <input
+                type="number"
+                name="age"
+                placeholder="Age"
+                value={newStudent.age}
+                onChange={handleChange}
+                required
+                min="5"
+                max="18"
+                style={{
+                  padding: "10px",
+                  borderRadius: "5px",
+                  border: "1px solid #ccc",
+                  fontSize: "14px",
+                }}
+              />
+              <input
+                type="text"
+                name="academicLevel"
+                placeholder="Academic Level"
+                value={newStudent.academicLevel}
+                onChange={handleChange}
+                required
+                style={{
+                  padding: "10px",
+                  borderRadius: "5px",
+                  border: "1px solid #ccc",
+                  fontSize: "14px",
+                }}
+              />
+              <input
+                type="text"
+                name="behavior"
+                placeholder="Behavior"
+                value={newStudent.behavior}
+                onChange={handleChange}
+                required
+                style={{
+                  padding: "10px",
+                  borderRadius: "5px",
+                  border: "1px solid #ccc",
+                  fontSize: "14px",
+                }}
+              />
+              <input
+                type="text"
+                name="language"
+                placeholder="Language"
+                value={newStudent.language}
+                onChange={handleChange}
+                required
+                style={{
+                  padding: "10px",
+                  borderRadius: "5px",
+                  border: "1px solid #ccc",
+                  fontSize: "14px",
+                }}
+              />
+              <label style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <input
+                  type="checkbox"
+                  name="specialNeeds"
+                  checked={newStudent.specialNeeds}
+                  onChange={handleChange}
+                  style={{ transform: "scale(1.2)" }}
                 />
                 Special Needs
               </label>

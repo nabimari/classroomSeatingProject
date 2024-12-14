@@ -815,6 +815,7 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
 };
 
 */
+
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase"; // Import Firebase Firestore instance
 import { collection, query, where, getDocs, doc, setDoc } from "firebase/firestore"; // Ensure doc and setDoc are imported
