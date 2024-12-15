@@ -551,6 +551,7 @@ const App = () => {
 
 export default App;
 */
+
 import React, { createContext, useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
@@ -654,12 +655,12 @@ const App = () => {
         <Router>
         <Header teacherName={currentUser?.displayName || "Teacher"} />
           <Routes>
-            {/* Public Routes */}
+
             <Route path="/" element={<Dashboard />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
 
-            {/* Private Routes */}
+
             <Route
               path="/teacher"
               element={

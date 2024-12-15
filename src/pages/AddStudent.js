@@ -560,6 +560,7 @@ const AddStudent = ({ teacherId }) => {
 
 export default AddStudent;
 */
+
 import React, { useState } from "react";
 import { collection, addDoc, doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { db } from "../firebase"; // Import Firebase Firestore instance

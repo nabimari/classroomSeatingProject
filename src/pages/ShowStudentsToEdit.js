@@ -246,7 +246,7 @@ export default ShowStudentsToEdit;
 import React, { useState, useEffect } from "react";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
-import Header from "../components/Header";
+
 
 const ShowStudentsToEdit = () => {
   const [classes, setClasses] = useState([]);

@@ -815,7 +815,7 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
 };
 
 */
-
+/*
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase"; // Import Firebase Firestore instance
 import { collection, query, where, getDocs, doc, setDoc } from "firebase/firestore"; // Ensure doc and setDoc are imported
@@ -955,6 +955,159 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
             placeholder="Number of Students"
             value={newClassStudents}
             onChange={(e) => setNewClassStudents(Number(e.target.value))}
+            style={{
+              padding: "10px",
+              borderRadius: "5px",
+              border: "1px solid #ccc",
+              fontSize: "14px",
+            }}
+          />
+          <button
+            onClick={handleAddClass}
+            style={{
+              padding: "10px",
+              backgroundColor: "#2196F3",
+              color: "white",
+              border: "none",
+              borderRadius: "5px",
+              cursor: "pointer",
+              fontSize: "16px",
+            }}
+          >
+            Add Class
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default MyClassesPage;
+*/
+import React, { useEffect, useState } from "react";
+import { db } from "../firebase"; // Import Firebase Firestore instance
+import { collection, query, where, getDocs, doc, setDoc } from "firebase/firestore"; // Ensure doc and setDoc are imported
+import { useNavigate } from "react-router-dom";
+
+const MyClassesPage = ({ teacherId, teacherName }) => {
+  const [classes, setClasses] = useState([]);
+  const [newClassName, setNewClassName] = useState("");
+
+  const navigate = useNavigate();
+
+  // Fetch classes for the teacher
+  useEffect(() => {
+    const fetchClasses = async () => {
+      try {
+        const classesRef = collection(db, "Classes");
+        const q = query(classesRef, where("teacherId", "==", teacherId));
+        const querySnapshot = await getDocs(q);
+
+        const fetchedClasses = [];
+        querySnapshot.forEach((doc) => {
+          fetchedClasses.push({ id: doc.id, ...doc.data() });
+        });
+
+        setClasses(fetchedClasses);
+      } catch (err) {
+        console.error("Error fetching classes:", err.message);
+      }
+    };
+
+    fetchClasses();
+  }, [teacherId]);
+
+  // Add a new class
+  const handleAddClass = async () => {
+    console.log("Adding class:", { newClassName, teacherId, teacherName });
+    if (newClassName.trim()) {
+      const classId = newClassName.replace(/\s+/g, "-").toLowerCase(); // Class ID generated from name
+      try {
+        const classRef = doc(db, "Classes", classId);
+        await setDoc(classRef, {
+          name: newClassName,
+          teacherId: teacherId,
+          teacherName: teacherName,
+          students: [],
+        });
+
+        setClasses((prev) => [
+          ...prev,
+          { id: classId, name: newClassName, students: [] },
+        ]);
+
+        console.log("Class added successfully to Firestore.");
+        alert("Class added successfully!");
+        setNewClassName(""); // Reset input field
+      } catch (err) {
+        console.error("Error adding class to Firestore:", err.message);
+        alert(`Error: ${err.message}`);
+      }
+    } else {
+      alert("Please provide a valid class name.");
+    }
+  };
+
+  return (
+    <div style={{ padding: "20px", maxWidth: "600px", margin: "0 auto", fontFamily: "Arial, sans-serif" }}>
+      <h2 style={{ textAlign: "center", color: "#333" }}>My Classes</h2>
+
+      {classes.length > 0 ? (
+        <ul style={{ listStyleType: "none", padding: "0" }}>
+          {classes.map((classItem) => (
+            <li
+              key={classItem.id}
+              style={{
+                marginBottom: "15px",
+                padding: "10px",
+                border: "1px solid #ccc",
+                borderRadius: "8px",
+                backgroundColor: "#f9f9f9",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <span>
+                  <strong>{classItem.name}</strong>
+                </span>
+                <button
+                  onClick={() => navigate(`/view-students/${classItem.id}`)}
+                  style={{
+                    padding: "8px 15px",
+                    backgroundColor: "#4CAF50",
+                    color: "white",
+                    border: "none",
+                    borderRadius: "5px",
+                    cursor: "pointer",
+                    fontSize: "14px",
+                  }}
+                >
+                  View Students
+                </button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p style={{ textAlign: "center", color: "#777" }}>No classes found. Add a new class below.</p>
+      )}
+
+      <div
+        style={{
+          marginTop: "20px",
+          padding: "20px",
+          border: "1px solid #ccc",
+          borderRadius: "8px",
+          backgroundColor: "#fff",
+          boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <h3 style={{ textAlign: "center", color: "#333" }}>Add a New Class</h3>
+        <div style={{ display: "flex", flexDirection: "column", gap: "15px" }}>
+          <input
+            type="text"
+            placeholder="Class Name"
+            value={newClassName}
+            onChange={(e) => setNewClassName(e.target.value)}
             style={{
               padding: "10px",
               borderRadius: "5px",
