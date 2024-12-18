@@ -574,7 +574,7 @@ import ViewStudentsPage from "./pages/ViewStudentsPage";
 // Create a Theme Context
 export const ThemeContext = createContext();
 
-const INACTIVITY_TIMEOUT = 3 * 60 * 1000; // 3 minutes inactivity timeout
+const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 3 minutes inactivity timeout
 
 const App = () => {
   const [theme, setTheme] = useState("light");
@@ -705,7 +705,7 @@ const App = () => {
               path="/generate-seating"
               element={
                 <PrivateRoute>
-                  <GenerateSeating />
+                   <GenerateSeating teacherId={currentUser?.uid} />
                 </PrivateRoute>
               }
             />
