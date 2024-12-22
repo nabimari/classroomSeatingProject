@@ -1,23 +1,66 @@
-/*
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { useNavigate } from "react-router-dom";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { ThemeContext } from "../App"; // Import ThemeContext
+import {  sendPasswordResetEmail } from "firebase/auth";
+import { FaUser, FaLock } from "react-icons/fa";
 
 const LoginPage = () => {
   const { theme } = useContext(ThemeContext); // Access theme
   const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
+  const [error] = useState("");
   const navigate = useNavigate();
+  const [rememberMe, setRememberMe] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+const [forgotEmail, setForgotEmail] = useState("");
+const [forgotError, setForgotError] = useState("");
+const [forgotSuccess, setForgotSuccess] = useState("");
+const [alertMessage, setAlertMessage] = useState("");
+const [alertType, setAlertType] = useState("");
 
+
+
+
+  useEffect(() => {
+    const savedEmail = localStorage.getItem("email");
+    const savedPassword = localStorage.getItem("password");
+    if (savedEmail && savedPassword) {
+      setFormData({ email: savedEmail});
+      setRememberMe(true);
+    }
+  }, []);
+  const handleForgotPassword = () => {
+    const auth = getAuth();
+    if (!forgotEmail) {
+      setForgotError("Please enter your email.");
+      return;
+    }
+
+    sendPasswordResetEmail(auth, forgotEmail)
+      .then(() => {
+        setForgotSuccess("Password reset email sent. Please check your inbox.");
+        setForgotError(""); // Clear error if any
+      })
+      .catch((error) => {
+        console.error("Error sending password reset email: ", error);
+        setForgotError("Failed to send password reset email. Please try again.");
+        setForgotSuccess(""); // Clear success message if any
+      });
+  };
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  if (rememberMe) {
+    localStorage.setItem("email", formData.email);
+  } else {
+    localStorage.removeItem("email");
+    localStorage.removeItem("password");
+  }
     const auth = getAuth();
     try {
       const userCredential = await signInWithEmailAndPassword(
@@ -29,161 +72,56 @@ const LoginPage = () => {
       const teacherDoc = await getDoc(doc(db, "Teachers", userCredential.user.uid));
       if (teacherDoc.exists()) {
         console.log("Teacher Data:", teacherDoc.data());
-        navigate("/teacher");
+        setAlertMessage("Logged in successfully!");
+        setAlertType("success");
+
+        setTimeout(() => {
+          setAlertMessage(""); // Clear any previous error messages
+          navigate("/Dashboard");
+        }, 2000);
       } else {
         throw new Error("No teacher record found. Please contact support.");
       }
     } catch (err) {
-      setError(err.message || "An unexpected error occurred.");
+      setAlertMessage( "Incorrect Login ID and/or password.");
+      setAlertType("error");
+      setTimeout(() => setAlertMessage(""), 2000);
     }
   };
-
+  const handleRememberMe = () => {
+    setRememberMe(!rememberMe);
+  };
   // Dynamic styles based on the theme
   const styles = {
-    body: {
-      backgroundColor: theme === "light" ? "#f0f0f0" : "#121212",
-      backgroundImage: `url(${theme === "light" ? "/path/to/light-image.jpg" : "/path/to/dark-image.jpg"})`,
-      backgroundSize: "cover",
-      backgroundPosition: "center",
-      backgroundRepeat: "no-repeat",
-      color: theme === "light" ? "#333" : "#fff",
-      fontFamily: "'Poppins', sans-serif",
-      height: "100vh",
+    pageContainer: {
       display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
+      flexDirection: "column",
+      minHeight: "100vh",
+      backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
+      color: theme === "light" ? "#333" : "#f9f9f9",
+      boxSizing: "border-box",
     },
-    container: {
-      width: "400px",
-      backgroundColor: theme === "light" ? "#ffffff" : "rgba(40, 40, 40, 0.9)",
-      padding: "50px 35px",
-      borderRadius: "10px",
-      backdropFilter: theme === "light" ? "none" : "blur(10px)",
-      border: theme === "light" ? "1px solid #ddd" : "2px solid rgba(255, 255, 255, 0.1)",
+    sidebarSpacing: {
+      width: "300px",
+      flexShrink: 0,
+    },
+    mainContent: {
+      flex: 1,
+      marginLeft: "250px",
+      padding: "20px",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: theme === "light" ? "#ffffff" : "#1E1E1E",
+      borderRadius: "12px",
       boxShadow: theme === "light"
         ? "0 4px 8px rgba(0, 0, 0, 0.1)"
-        : "0 0 40px rgba(8, 7, 16, 0.6)",
+        : "0 4px 8px rgba(0, 0, 0, 0.5)",
     },
-    header: {
-      fontSize: "32px",
-      fontWeight: "600",
-      color: theme === "light" ? "#333" : "#fff",
-      textAlign: "center",
-      borderBottom: `2px solid ${theme === "light" ? "#007bff" : "#fff"}`,
-      paddingBottom: "10px",
-      marginBottom: "20px",
-    },
-    input: {
-      display: "block",
-      width: "100%",
-      height: "50px",
-      marginTop: "20px",
-      padding: "10px",
-      borderRadius: "3px",
-      backgroundColor: theme === "light" ? "#f9f9f9" : "rgba(255, 255, 255, 0.07)",
-      color: theme === "light" ? "#333" : "#fff",
-      fontSize: "14px",
-      outline: "none",
-      border: theme === "light" ? "1px solid #ddd" : "1px solid #444",
-    },
-    button: {
-      width: "100%",
-      marginTop: "30px",
-      padding: "15px",
-      borderRadius: "5px",
-      backgroundColor: theme === "light" ? "#007bff" : "#333",
-      color: theme === "light" ? "#fff" : "#fff",
-      fontSize: "18px",
-      fontWeight: "600",
-      cursor: "pointer",
-      border: "none",
-    },
-    error: {
-      color: "red",
-      textAlign: "center",
-      marginTop: "10px",
-    },
-  };
-
-  return (
-
-    <div style={styles.body}>
-      <form style={styles.container} onSubmit={handleSubmit}>
-        <h3 style={styles.header}>Login</h3>
-        {error && <p style={styles.error}>{error}</p>}
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          style={styles.input}
-        />
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          style={styles.input}
-        />
-        <button type="submit" style={styles.button}>
-          Log In
-        </button>
-      </form>
-    </div>
-  );
-};
-
-export default LoginPage;
-*/
-import React, { useState, useContext } from "react";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { useNavigate } from "react-router-dom";
-import { doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
-import { ThemeContext } from "../App"; // Import ThemeContext
-
-const LoginPage = () => {
-  const { theme } = useContext(ThemeContext); // Access theme
-  const [formData, setFormData] = useState({ email: "", password: "" });
-  const [error, setError] = useState("");
-  const navigate = useNavigate();
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const auth = getAuth();
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-
-      const teacherDoc = await getDoc(doc(db, "Teachers", userCredential.user.uid));
-      if (teacherDoc.exists()) {
-        console.log("Teacher Data:", teacherDoc.data());
-        navigate("/teacher");
-      } else {
-        throw new Error("No teacher record found. Please contact support.");
-      }
-    } catch (err) {
-      setError(err.message || "An unexpected error occurred.");
-    }
-  };
-
-  // Dynamic styles based on the theme
-  const styles = {
     container: {
       padding: "40px",
-      maxWidth: "500px",
-      margin: "40px auto",
+      maxWidth: "400px", // Adjusted width
+      width: "100%", // Ensures full width
       backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
       color: theme === "light" ? "#333" : "#f9f9f9",
       borderRadius: "12px",
@@ -191,7 +129,7 @@ const LoginPage = () => {
         ? "0 4px 20px rgba(0, 0, 0, 0.1)"
         : "0 4px 20px rgba(0, 0, 0, 0.4)",
       fontFamily: "'Roboto', sans-serif",
-      transform: "translateY(100px)",
+      transform: "translateY(0)",
     },
     header: {
       textAlign: "center",
@@ -213,7 +151,7 @@ const LoginPage = () => {
       gap: "20px",
     },
     input: {
-      width: "100%",
+      width: "95%",
       height: "50px",
       padding: "12px",
       borderRadius: "8px",
@@ -228,10 +166,9 @@ const LoginPage = () => {
       transition: "all 0.3s ease",
     },
     button: {
-      width: "105%",
+      width: "103%",
       height: "50px",
       padding: "12px",
-      margin : "20px auto",
       borderRadius: "8px",
       backgroundColor: "#4CAF50",
       color: "#fff",
@@ -247,44 +184,421 @@ const LoginPage = () => {
       backgroundColor: "#45A049",
       transform: "scale(0.98)",
     },
-  };
+    signUpButton: {
+      width: "103%",
+      padding: "15px 20px",
+      backgroundColor: theme === "light" ? "#fff" : "#1E1E1E",
+      color: theme === "light" ? "#000" : "#f9f9f9",
+      border: "1px solid",
+      borderColor: theme === "light" ? "#ccc" : "#444",
+      borderRadius: "8px",
+      fontSize: "16px",
+      fontWeight: "bold",
+      cursor: "pointer",
+      textTransform: "uppercase",
+      marginTop: "15px",
+      transition: "all 0.3s ease",
+      boxShadow: theme === "light"
+        ? "0 2px 4px rgba(0, 0, 0, 0.1)"
+        : "0 2px 4px rgba(255, 255, 255, 0.1)",
+    },
+    alertMessage: {
+      position: "absolute",
+      top: "150px",
+      left: "60%",
+      transform: "translateX(-50%)",
+      backgroundColor: alertType === "success" ? "#4CAF50" : "#F44336",
+      color: "#fff",
+      padding: "15px",
+      borderRadius: "8px",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+      textAlign: "center",
+      fontWeight: "bold",
+      zIndex: 1000,
+      display: "flex",
+      alignItems: "center",
+      gap: "10px",
+    },
+    inputWrapper: {
+      position: "relative",
+      width: "95%", // Matches the width of the input field
+      marginBottom: "20px", // Space between inputs
+    },
+    inputWithIcon: {
+      width: "100%",
+      height: "50px",
+      padding: "12px 12px 12px 40px", // Adjust padding to make room for the icon
+      borderRadius: "8px",
+      border: theme === "light" ? "1px solid #ddd" : "1px solid #444",
+      backgroundColor: theme === "light" ? "#fff" : "#1e1e1e",
+      color: theme === "light" ? "#333" : "#f9f9f9",
+      fontSize: "16px",
+      outline: "none",
+      boxShadow: theme === "light"
+        ? "inset 0 2px 4px rgba(0, 0, 0, 0.1)"
+        : "inset 0 2px 4px rgba(255, 255, 255, 0.1)",
+      transition: "all 0.3s ease",
+    },
+    icon: {
+      position: "absolute",
+      top: "50%",
+      right: "10px",
+      transform: "translateY(-50%)",
+      color: theme === "light" ? "#777" : "#ccc",
+      fontSize: "20px",
+    },
+      footer: {
+        backgroundColor: theme === "light" ? "#333" : "#444",
+        color: "#fff",
+        textAlign: "center",
+        marginLeft: "150px",
+        padding: "50px",
+        width: "93%",
+        boxShadow: theme === "light"
+          ? "0 -4px 10px rgba(0, 0, 0, 0.1)"
+          : "0 -4px 10px rgba(0, 0, 0, 0.4)",
+      },
+      footerContainer: {
+        width: "100%",
+        backgroundColor: theme === "light" ? "#333" : "#1E1E1E",
+        color: "#fff",
+        padding: "40px 20px",
+        textAlign: "center",
+        borderTop: theme === "light" ? "1px solid #ddd" : "1px solid #444",
+      },
+      footerContent: {
+        maxWidth: "1200px",
+        margin: "0 auto",
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        flexWrap: "wrap",
+        gap: "20px",
+      },
+      footerColumn: {
+        flex: "1 1 calc(25% - 20px)",
+        textAlign: "center",
+      },
+      footerHeader: {
+        fontWeight: "bold",
+        marginTop: "-20px",
+        fontSize: "20px",
+        borderBottom: "2px solid #fff",
+        paddingBottom: "5px",
+      },
+      footerLink: {
+        color: "#fff",
+        textDecoration: "none",
+        fontSize: "14px",
+        marginBottom: "10px",
+        display: "block",
+        transition: "color 0.3s ease",
+      },
+      footerLinkHover: {
+        color: theme === "light" ? "#4CAF50" : "#90CAF9",
+      },
+      footerCopyright: {
+        marginTop: "20px",
+        fontSize: "14px",
+        color: "#bbb",
+        textAlign: "center",
+      },
+      newsletterInput: {
+        padding: "12px",
+        borderRadius: "8px",
+        border: "1px solid #bbb",
+        width: "calc(100% - 110px)",
+        marginRight: "10px",
+        backgroundColor: theme === "light" ? "#fff" : "#333",
+        color: theme === "light" ? "#333" : "#fff",
+      },
+      newsletterButton: {
+        padding: "12px 25px",
+        backgroundColor: theme === "light" ? "#4CAF50" : "#90CAF9",
+        color: "#fff",
+        border: "none",
+        borderRadius: "8px",
+        cursor: "pointer",
+        transition: "background-color 0.3s ease",
+      },
+      footerWrapper: {
+        display: "flex",
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "20px 0",
+        backgroundColor:  "#0d2b39",
+        color: "#ffffff",
+        textAlign: "center",
+        borderTop: "1px solid #ccc",
+        width: "100%",
+      },
+      footerSpacing: {
+        width: "300px",
+        flexShrink: 0,
+      },
+      footerContentArea: {
+        flex: 1,
+        padding: "20px",
+      },
+      socialIcons: {
+        display: "flex",
+        marginRight:"10px",
+        gap: "40px",
+        justifyContent: "center",
+        marginTop: "20px",
+      },
+      socialIcon: {
+        fontSize: "30px",
+        textDecoration: "none",
+        transition: "transform 0.3s ease, color 0.3s ease",
+        cursor: "pointer",
+      },
+      facebookIcon: {
+        color: "#1877F2",
+      },
+      twitterIcon: {
+        color: "#1DA1F2",
+      },
+      linkedinIcon: {
+        color: "#0077B5",
+      },
+      socialText: {
+        marginTop: "10px",
+        fontSize: "14px",
+        color: "#fff",
+      },
+      socialIconContainer: {
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+      },
+    };
+
+
+
+
 
 
   return (
+    <div style={styles.pageContainer}>
+    {alertMessage && (
+  <div
+    style={styles.alertMessage}
+  >
+    {alertType === "success" ? (
+      <span style={{ fontSize: "24px" }}>✔</span> // Success icon
+    ) : (
+      <span style={{ fontSize: "24px" }}>✖</span> // Error icon
+    )}
+    <span>{alertMessage}</span>
+  </div>
+)}
+    <div style={styles.scrollableContainer}></div>
+      <div style={styles.sidebarSpacing}></div>
 
-    <div style={styles.container}>
-  <h2 style={styles.header}>Login</h2>
-  {error && <p style={styles.error}>{error}</p>}
-  <form style={styles.form} onSubmit={handleSubmit}>
+      {/* Main Content */}
+      <div style={styles.mainContent}>
+        <div style={styles.container}>
+          <h2 style={styles.header}>Login</h2>
+          {error && <p style={styles.error}>{error}</p>}
+          <form style={styles.form} onSubmit={handleSubmit}>
+          <div style={styles.inputWrapper}>
+          <FaUser style={styles.icon} />
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              style={styles.input}
+              required
+            />
+            </div>
+            <div style={styles.inputWrapper}>
+            <FaLock style={styles.icon} />
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              value={formData.password}
+              onChange={handleChange}
+              style={styles.input}
+              required
+            />
+            </div>
+            <div style={styles.checkboxContainer}>
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+               onChange={handleRememberMe}
+              />
+              <label htmlFor="rememberMe">Remember Me</label>
+            </div>
+            <button
+              type="submit"
+              style={styles.button}
+              onMouseEnter={(e) => (e.target.style.backgroundColor = "#45A049")}
+              onMouseLeave={(e) => (e.target.style.backgroundColor = "#4CAF50")}
+            >
+              Log In
+            </button>
+            <p style={{ textAlign: "center", marginTop: "10px" }}>
+  <button
+    type="button"
+    style={{
+      background: "none",
+      border: "none",
+      color: "#007bff",
+      textDecoration: "underline",
+      cursor: "pointer",
+    }}
+    onClick={() => setShowForgotPassword(true)}
+  >
+    Forgot Password?
+  </button>
+</p>
+{showForgotPassword && (
+  <div
+    style={{
+      backgroundColor: theme === "light" ? "#f9f9f9" : "#1E1E1E",
+      padding: "20px",
+      borderRadius: "8px",
+      boxShadow: "0 4px 10px rgba(0, 0, 0, 0.1)",
+      textAlign: "center",
+      marginTop: "20px",
+    }}
+  >
+    {/* "X" Close Button */}
+    <button
+        onClick={() => setShowForgotPassword(false)} // Hide the reset container
+        style={{
+          backgroundColor: "transparent",
+          border: "none",
+          marginLeft:"350px",
+          marginTop:"-10px",
+          color: theme === "light" ? "#333" : "#fff",
+          fontSize: "18px",
+          fontWeight: "bold",
+          cursor: "pointer",
+        }}
+      >
+        X
+      </button>
+    <h3 style={{ marginBottom: "15px", color: theme === "light" ? "#333" : "#fff" }}>
+      Reset Password
+    </h3>
+
     <input
       type="email"
-      name="email"
-      placeholder="Email"
-      value={formData.email}
-      onChange={handleChange}
-      style={styles.input}
-      required
+      value={forgotEmail}
+      onChange={(e) => setForgotEmail(e.target.value)}
+      placeholder="Enter your email"
+      style={{
+        width: "95%",
+        padding: "10px",
+        marginBottom: "10px",
+        borderRadius: "5px",
+        border: theme === "light" ? "1px solid #ccc" : "1px solid #444",
+        backgroundColor: theme === "light" ? "#fff" : "#2C2C2C",
+        color: theme === "light" ? "#333" : "#fff",
+      }}
     />
-    <input
-      type="password"
-      name="password"
-      placeholder="Password"
-      value={formData.password}
-      onChange={handleChange}
-      style={styles.input}
-      required
-    />
+    {forgotError && <p style={{ color: "red" }}>{forgotError}</p>}
+    {forgotSuccess && <p style={{ color: "green" }}>{forgotSuccess}</p>}
     <button
-      type="submit"
-      style={styles.button}
-      onMouseEnter={(e) => (e.target.style.backgroundColor = "#45A049")}
-      onMouseLeave={(e) => (e.target.style.backgroundColor = "#4CAF50")}
+      onClick={handleForgotPassword}
+      style={{
+        padding: "10px 20px",
+        backgroundColor: theme === "light" ? "#007bff" : "#555",
+        color: "#fff",
+        border: "none",
+        borderRadius: "5px",
+        cursor: "pointer",
+        marginBottom: "10px",
+        transition: "all 0.3s ease",
+      }}
     >
-      Log In
+      Submit
     </button>
-  </form>
-</div>
+  </div>
+)}
+<button
+  onClick={() => navigate("/register")} // Navigate to the Register page
+  style={styles.signUpButton}
+
+>
+  I NEED A NEW ACCOUNT
+</button>
+          </form>
+        </div>
+      </div>
+      <footer style={styles.footerWrapper}>
+      <div style={styles.footerSpacing}></div>
+      <div style={styles.footerContentArea}>
+  <div style={styles.footerContent}>
+    <div style={styles.footerColumn}>
+      <h3 style={styles.footerHeader}>About Us</h3>
+      <p>Professional project/system offering solutions for classroom management and virtual learning environments.</p>
+    </div>
+
+    <div style={styles.footerColumn}>
+      <h3 style={styles.footerHeader}>Stay Connected</h3>
+      <div style={styles.socialIcons}>
+      <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+/>
+<div style={styles.socialIconContainer}>
+      <a
+        href="https://facebook.com"
+        style={{ ...styles.socialIcon, ...styles.facebookIcon }}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <i className="fab fa-facebook-f"></i>
+      </a>
+      <span style={styles.socialText}>Facebook</span>
+    </div>
+    {/* Twitter */}
+    <div style={styles.socialIconContainer}>
+      <a
+        href="https://twitter.com"
+        style={{ ...styles.socialIcon, ...styles.twitterIcon }}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <i className="fab fa-twitter"></i>
+      </a>
+      <span style={styles.socialText}>Twitter</span>
+    </div>
+    {/* LinkedIn */}
+    <div style={styles.socialIconContainer}>
+      <a
+        href="https://linkedin.com"
+        style={{ ...styles.socialIcon, ...styles.linkedinIcon }}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <i className="fab fa-linkedin-in"></i>
+      </a>
+      <span style={styles.socialText}>LinkedIn</span>
+    </div>
+      </div>
+    </div>
+  </div>
+  <div style={styles.footerCopyright}>
+    © {new Date().getFullYear()} Virtual Classroom. All Rights Reserved.
+  </div>
+  </div>
+</footer>
+    </div>
+
   );
+
 };
 
 export default LoginPage;

@@ -1,294 +1,3 @@
-/*
-import React, { useState, useContext, useEffect } from "react";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
-import { db } from "../firebase";
-import { useNavigate } from "react-router-dom";
-import { ThemeContext } from "../App"; // Import ThemeContext
-
-const ShowStudents = () => {
-  const navigate = useNavigate();
-  const [students, setStudents] = useState([]);
-  const [grades, setGrades] = useState([]); // For storing available grades
-  const [selectedClass, setSelectedClass] = useState(""); // Currently selected class
-  const [searchQuery, setSearchQuery] = useState("");
-  const [showSearch, setShowSearch] = useState(false);
-  const [showFetchButton, setShowFetchButton] = useState(true);
-
-  const { theme } = useContext(ThemeContext); // Access theme from ThemeContext
-
-  // Dynamically update styles based on the theme
-  useEffect(() => {
-    document.body.style.backgroundColor = theme === "light" ? "#f9f9f9" : "#121212";
-    document.body.style.color = theme === "light" ? "#333" : "#f9f9f9";
-
-    return () => {
-      document.body.style.backgroundColor = "";
-      document.body.style.color = "";
-    };
-  }, [theme]);
-
-  // Fetch list of grades/classes
-  useEffect(() => {
-    const fetchGrades = async () => {
-      try {
-        const querySnapshot = await getDocs(collection(db, "Grades"));
-        const gradesList = querySnapshot.docs.map((docSnapshot) => ({
-          id: docSnapshot.id,
-          ...docSnapshot.data(),
-        }));
-        setGrades(gradesList);
-      } catch (error) {
-        console.error("Error fetching grades: ", error);
-      }
-    };
-
-    fetchGrades();
-  }, []);
-
-  const fetchStudents = async () => {
-    try {
-      let studentList = [];
-
-      if (selectedClass) {
-        const classRef = doc(db, "Grades", selectedClass);
-        const classDoc = await getDoc(classRef);
-
-        if (classDoc.exists()) {
-          const studentIds = classDoc.data()?.students || [];
-          studentList = await Promise.all(
-            studentIds.map(async (studentId) => {
-              const studentDoc = await getDoc(doc(db, "Students", studentId));
-              const questionnaireDoc = await getDoc(
-                doc(db, "Students", studentId, "Questionnaire", "Responses")
-              );
-              return {
-                id: studentDoc.id,
-                ...studentDoc.data(),
-                hasSubmitted: questionnaireDoc.exists(),
-              };
-            })
-          );
-        }
-      } else {
-        const querySnapshot = await getDocs(collection(db, "Students"));
-        studentList = await Promise.all(
-          querySnapshot.docs.map(async (docSnapshot) => {
-            const questionnaireDoc = await getDoc(
-              doc(db, "Students", docSnapshot.id, "Questionnaire", "Responses")
-            );
-            return {
-              id: docSnapshot.id,
-              ...docSnapshot.data(),
-              hasSubmitted: questionnaireDoc.exists(),
-            };
-          })
-        );
-      }
-
-      setStudents(studentList);
-      setShowSearch(true);
-      setShowFetchButton(false);
-    } catch (error) {
-      console.error("Error fetching students: ", error);
-    }
-  };
-
-  const filteredStudents = students.filter((student) =>
-    student.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
-  const styles = {
-    container: {
-      padding: "20px",
-      maxWidth: "1000px",
-      margin: "0 auto",
-      fontFamily: "'Arial', sans-serif",
-    },
-    header: {
-      backgroundColor: theme === "light" ? "#007bff" : "#444",
-      color: "#fff",
-      padding: "20px",
-      borderRadius: "10px",
-      textAlign: "center",
-      marginBottom: "20px",
-      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
-    },
-    headerTitle: {
-      fontSize: "36px",
-      fontWeight: "bold",
-    },
-    headerSubtitle: {
-      fontSize: "18px",
-      fontStyle: "italic",
-      marginTop: "10px",
-    },
-    dropdownContainer: {
-      display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      marginBottom: "20px",
-    },
-    dropdown: {
-      width: "48%",
-      padding: "12px",
-      borderRadius: "8px",
-      border: theme === "light" ? "2px solid #ccc" : "2px solid #555",
-      fontSize: "16px",
-      backgroundColor: theme === "light" ? "#fff" : "#333",
-      color: theme === "light" ? "#333" : "#f9f9f9",
-    },
-    searchBar: {
-      width: "48%",
-      padding: "12px",
-      borderRadius: "8px",
-      border: theme === "light" ? "2px solid #ccc" : "2px solid #555",
-      fontSize: "16px",
-      backgroundColor: theme === "light" ? "#fff" : "#333",
-      color: theme === "light" ? "#333" : "#f9f9f9",
-    },
-    fetchButton: {
-      padding: "15px 30px",
-      borderRadius: "8px",
-      backgroundColor: theme === "light" ? "#007bff" : "#555",
-      color: "#fff",
-      border: "none",
-      cursor: "pointer",
-      fontSize: "18px",
-      fontWeight: "bold",
-      transition: "background-color 0.3s ease",
-      marginBottom: "20px",
-    },
-    tableContainer: {
-      borderRadius: "8px",
-      backgroundColor: theme === "light" ? "#fff" : "#333",
-      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-      overflow: "hidden",
-    },
-    table: {
-      width: "100%",
-      borderCollapse: "collapse",
-    },
-    th: {
-      padding: "15px",
-      backgroundColor: theme === "light" ? "#007bff" : "#444",
-      color: "#fff",
-      textAlign: "left",
-    },
-    td: {
-      padding: "15px",
-      borderBottom: "1px solid #ddd",
-      color: theme === "light" ? "#333" : "#f9f9f9",
-    },
-    noData: {
-      textAlign: "center",
-      fontSize: "16px",
-      margin: "20px 0",
-      color: theme === "light" ? "#666" : "#ccc",
-    },
-  };
-
-  return (
-    <div style={styles.container}>
-      <header style={styles.header}>
-        <div style={styles.headerTitle}>Student Management</div>
-      </header>
-
-      <div style={styles.dropdownContainer}>
-        <select
-          value={selectedClass}
-          onChange={(e) => setSelectedClass(e.target.value)}
-          style={styles.dropdown}
-        >
-          <option value="">Select class</option>
-          {grades.map((grade) => (
-            <option key={grade.id} value={grade.id}>
-              {grade.name}
-            </option>
-          ))}
-        </select>
-        {showSearch && (
-          <input
-            type="text"
-            placeholder="Search students by name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={styles.searchBar}
-          />
-        )}
-      </div>
-
-      {showFetchButton && (
-        <button onClick={fetchStudents} style={styles.fetchButton}>
-          Fetch Students
-        </button>
-      )}
-
-      <div style={styles.tableContainer}>
-        {filteredStudents.length > 0 ? (
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Name</th>
-                <th style={styles.th}>Age</th>
-                <th style={styles.th}>Academic Level</th>
-                <th style={styles.th}>Behavior</th>
-                <th style={styles.th}>Language</th>
-                <th style={styles.th}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredStudents.map((student) => (
-                <tr key={student.id}>
-                  <td style={styles.td}>{student.name}</td>
-                  <td style={styles.td}>{student.age}</td>
-                  <td style={styles.td}>{student.academicLevel}</td>
-                  <td style={styles.td}>{student.behavior}</td>
-                  <td style={styles.td}>{student.language}</td>
-                  <td style={styles.td}>
-                    {student.hasSubmitted ? (
-                      <button
-                        onClick={() => navigate(`/show-results/${student.id}`)}
-                        style={{
-                          backgroundColor: "#dc3545",
-                          color: "#fff",
-                          borderRadius: "8px",
-                          padding: "8px 15px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Show Results
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => navigate(`/questionnaire/${student.id}`)}
-                        style={{
-                          backgroundColor: "#28a745",
-                          color: "#fff",
-                          borderRadius: "8px",
-                          padding: "8px 15px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Do Questionnaire
-                      </button>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p style={styles.noData}>
-            No students found. Click "Fetch Students" to load data.
-          </p>
-        )}
-      </div>
-    </div>
-  );
-};
-
-export default ShowStudents;
-*/
 import React, { useState, useContext, useEffect } from "react";
 import { collection, getDocs, doc, getDoc, query, where } from "firebase/firestore";
 import { db } from "../firebase"; // Ensure the correct path for your firebase.js
@@ -409,22 +118,7 @@ const ShowStudents = () => {
             console.log("No student IDs found in the class data.");
           }
         }
-      } else {
-        // Fetch all students if no class is selected
-        const querySnapshot = await getDocs(collection(db, "Students"));
-        studentList = await Promise.all(
-          querySnapshot.docs.map(async (docSnapshot) => {
-            const questionnaireDoc = await getDoc(
-              doc(db, "Students", docSnapshot.id, "Questionnaire", "Responses")
-            );
-            return {
-              id: docSnapshot.id,
-              ...docSnapshot.data(),
-              hasSubmitted: questionnaireDoc.exists(),
-            };
-          })
-        );
-      }
+       }
 
       setTimeout(() => {
         setStudents(studentList);
@@ -443,8 +137,30 @@ const ShowStudents = () => {
   );
 
   const styles = {
-    container: {
+    pageContainer: {
+      display: "flex",
+      flexDirection: "row",
+      minHeight: "100vh",
+      backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
+      color: theme === "light" ? "#333" : "#f9f9f9",
       padding: "20px",
+      boxSizing: "border-box",
+    },
+    sidebarSpacing: {
+      width: "280px", // Matches the sidebar width
+      flexShrink: 0,
+    },
+    mainContent: {
+      flex: 1,
+      marginLeft: "20px", // Adjust spacing from sidebar
+      padding: "20px",
+      backgroundColor: theme === "light" ? "#ffffff" : "#1E1E1E",
+      borderRadius: "12px",
+      boxShadow: theme === "light"
+        ? "0 4px 8px rgba(0, 0, 0, 0.1)"
+        : "0 4px 8px rgba(0, 0, 0, 0.5)",
+    },
+    container: {
       maxWidth: "1200px",
       margin: "0 auto",
       fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
@@ -509,19 +225,13 @@ const ShowStudents = () => {
       boxShadow: "0 3px 6px rgba(0, 0, 0, 0.2)",
       transition: "background-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
     },
-    fetchButtonHover: {
-      backgroundColor: "#218838",
-      boxShadow: "0 5px 10px rgba(0, 0, 0, 0.3)",
-    },
     tableContainer: {
       borderRadius: "12px",
       backgroundColor: theme === "light" ? "#ffffff" : "#2E3B4E",
       boxShadow: "0 6px 18px rgba(0, 0, 0, 0.1)",
       overflowY: "auto",
-      maxHeight: "500px",
+      maxHeight: "700px",
       border: theme === "light" ? "1px solid #E0E0E0" : "1px solid #555",
-      scrollbarWidth: "thin",
-      scrollbarColor: theme === "light" ? "#aaa #f1f1f1" : "#555 #333",
     },
     table: {
       width: "100%",
@@ -541,20 +251,10 @@ const ShowStudents = () => {
     td: {
       padding: "12px 18px",
       borderBottom: theme === "light" ? "1px solid #E0E0E0" : "1px solid #555",
-      transition: "background-color 0.3s ease-in-out",
       fontSize: "14px",
       color: theme === "light" ? "#333" : "#ddd",
     },
-    trHover: {
-      backgroundColor: theme === "light" ? "#F8F9FA" : "#2D3748",
-    },
     noData: {
-      textAlign: "center",
-      fontSize: "18px",
-      margin: "20px 0",
-      color: theme === "light" ? "#999" : "#bbb",
-    },
-    loadingMessage: {
       textAlign: "center",
       fontSize: "18px",
       margin: "20px 0",
@@ -563,107 +263,109 @@ const ShowStudents = () => {
   };
 
 
+
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
-        <div style={styles.headerTitle}>Student Management</div>
-      </header>
+    <div style={styles.pageContainer}>
+      <div style={styles.sidebarSpacing}></div>
+      <div style={styles.mainContent}>
+        <header style={styles.header}>
+          <div style={styles.headerTitle}>Student Management</div>
+        </header>
 
-      <div style={styles.dropdownContainer}>
-        <select
-          value={selectedClass}
-          onChange={(e) => {
-            setSelectedClass(e.target.value);
-            setShowFetchButton(true); // Show Fetch Button again if a new class is selected
-            setStudents([]); // Reset students list
-          }}
-          style={styles.dropdown}
-        >
-          <option value="">Select class</option>
-          {classes.map((cls) => (
-            <option key={cls.id} value={cls.id}>
-              {cls.name}
-            </option>
-          ))}
-        </select>
-        {showSearch && (
-          <input
-            type="text"
-            placeholder="Search students by name..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={styles.searchBar}
-          />
+        <div style={styles.dropdownContainer}>
+          <select
+            value={selectedClass}
+            onChange={(e) => {
+              setSelectedClass(e.target.value);
+              setShowFetchButton(true); // Show Fetch Button again if a new class is selected
+              setStudents([]); // Reset students list
+            }}
+            style={styles.dropdown}
+          >
+            <option value="">Select class</option>
+            {classes.map((cls) => (
+              <option key={cls.id} value={cls.id}>
+                {cls.name}
+              </option>
+            ))}
+          </select>
+          {showSearch && (
+            <input
+              type="text"
+              placeholder="Search students by name..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              style={styles.searchBar}
+            />
+          )}
+        </div>
+
+        {showFetchButton && selectedClass &&(
+          <button onClick={fetchStudents} style={styles.fetchButton}>
+            Fetch Students
+          </button>
         )}
-      </div>
 
-      {showFetchButton && (
-        <button onClick={fetchStudents} style={styles.fetchButton}>
-          Fetch Students
-        </button>
-      )}
+        {loading && <p style={styles.loadingMessage}>Loading students...</p>}
 
-      {loading && <p style={styles.loadingMessage}>Loading students...</p>}
-
-      <div style={styles.tableContainer}>
-        {filteredStudents.length > 0 ? (
-          <table style={styles.table}>
-            <thead>
-              <tr>
-                <th style={styles.th}>Name</th>
-                <th style={styles.th}>Age</th>
-                <th style={styles.th}>Academic Level</th>
-                <th style={styles.th}>Behavior</th>
-                <th style={styles.th}>Language</th>
-                <th style={styles.th}>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredStudents.map((student) => (
-                <tr key={student.id}>
-                  <td style={styles.td}>{student.name}</td>
-                  <td style={styles.td}>{student.age}</td>
-                  <td style={styles.td}>{student.academicLevel}</td>
-                  <td style={styles.td}>{student.behavior}</td>
-                  <td style={styles.td}>{student.language}</td>
-                  <td style={styles.td}>
-                    {student.hasSubmitted ? (
-
-                      <button
-                        onClick={() => navigate(`/show-results/${student.id}`)}
-                        style={{
-                          backgroundColor: "#dc3545",
-                          color: "#fff",
-                          borderRadius: "8px",
-                          padding: "8px 15px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Show Results
-                      </button>
-
-                    ) : (
-                      <button
-                        onClick={() => navigate(`/questionnaire/${student.id}`)}
-                        style={{
-                          backgroundColor: "#28a745",
-                          color: "#fff",
-                          borderRadius: "8px",
-                          padding: "8px 15px",
-                          cursor: "pointer",
-                        }}
-                      >
-                        Do Questionnaire
-                      </button>
-                    )}
-                  </td>
+        <div style={styles.tableContainer}>
+          {filteredStudents.length > 0 ? (
+            <table style={styles.table}>
+              <thead>
+                <tr>
+                  <th style={styles.th}>Name</th>
+                  <th style={styles.th}>Age</th>
+                  <th style={styles.th}>Academic Level</th>
+                  <th style={styles.th}>Behavior</th>
+                  <th style={styles.th}>Language</th>
+                  <th style={styles.th}>Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          !loading && <p style={styles.noData}>No students found.</p>
-        )}
+              </thead>
+              <tbody>
+                {filteredStudents.map((student) => (
+                  <tr key={student.id}>
+                    <td style={styles.td}>{student.name}</td>
+                    <td style={styles.td}>{student.age}</td>
+                    <td style={styles.td}>{student.academicLevel}</td>
+                    <td style={styles.td}>{student.behavior}</td>
+                    <td style={styles.td}>{student.language}</td>
+                    <td style={styles.td}>
+                      {student.hasSubmitted ? (
+                        <button
+                          onClick={() => navigate(`/show-results/${student.id}`)}
+                          style={{
+                            backgroundColor: "#dc3545",
+                            color: "#fff",
+                            borderRadius: "8px",
+                            padding: "8px 15px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Show Results
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => navigate(`/questionnaire/${student.id}`)}
+                          style={{
+                            backgroundColor: "#28a745",
+                            color: "#fff",
+                            borderRadius: "8px",
+                            padding: "8px 15px",
+                            cursor: "pointer",
+                          }}
+                        >
+                          Do Questionnaire
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            !loading && <p style={styles.noData}>No students found.</p>
+          )}
+        </div>
       </div>
     </div>
   );
