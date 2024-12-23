@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { collection, doc, getDoc, getDocs, query, setDoc, where } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, query, setDoc, where,updateDoc } from "firebase/firestore";
 import { db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App";
@@ -137,6 +137,13 @@ const ShowQuesResults = () => {
       // Step 4: Update the fields in the "Responses" document
          await setDoc(responsesRef, responses, { merge: true });
 
+         const studentMainRef = doc(db, "Students", docSnapshot.id);
+         await updateDoc(studentMainRef, {
+
+           academicLevel: responses["Academic Performance"]["Rate performance"],
+           behavior: responses["Behavioral and Social Traits"]["Behavior rating"],
+           specialNeeds: responses["Special Needs"]["Special accommodations"],
+         });
           alert("Responses saved successfully!");
           navigate("/show-students")
         });
@@ -144,8 +151,8 @@ const ShowQuesResults = () => {
         console.log("No document found for the given student ID.");
       }
     } catch (error) {
-      console.error("Error saving responses:", error);
-    }
+      console.error("Error saving responses:", error);
+    }
   };
 
   const styles = {

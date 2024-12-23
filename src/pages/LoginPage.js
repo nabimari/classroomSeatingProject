@@ -31,6 +31,37 @@ const [alertType, setAlertType] = useState("");
       setRememberMe(true);
     }
   }, []);
+
+  /*const handleForgotPassword = async () => {
+    const auth = getAuth();
+    if (!forgotEmail) {
+      setForgotError("Please enter your email.");
+      return;
+    }
+
+    try {
+
+      const querySnapshot = await getDocs(collection(db, "Teachers"));
+      // Check if the email exists in the database
+      const emailExists = querySnapshot.docs.some(
+        (doc) => doc.data().email === forgotEmail
+      );
+
+      if (!emailExists) {
+        setForgotError("The entered email does not exist.");
+        setForgotSuccess("");
+        return;
+      }
+
+      await sendPasswordResetEmail(auth, forgotEmail);
+      setForgotSuccess("Password reset email sent. Please check your inbox.");
+      setForgotError("");
+    } catch (error) {
+      console.error("Error verifying email or sending password reset email:", error);
+      setForgotError("An error occurred. Please try again.");
+      setForgotSuccess("");
+    }
+  };*/
   const handleForgotPassword = () => {
     const auth = getAuth();
     if (!forgotEmail) {
@@ -474,7 +505,7 @@ const [alertType, setAlertType] = useState("");
   >
     {/* "X" Close Button */}
     <button
-        onClick={() => setShowForgotPassword(false)} // Hide the reset container
+        onClick={() => setShowForgotPassword(false)}
         style={{
           backgroundColor: "transparent",
           border: "none",

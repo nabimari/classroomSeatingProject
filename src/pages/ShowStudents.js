@@ -115,8 +115,8 @@ const ShowStudents = () => {
 
             console.log("Final Student List:", studentList);
           } else {
-            console.log("No student IDs found in the class data.");
-          }
+            console.log("No student IDs found in the class data.");
+          }
         }
        }
 
@@ -318,6 +318,7 @@ const ShowStudents = () => {
                   <th style={styles.th}>Academic Level</th>
                   <th style={styles.th}>Behavior</th>
                   <th style={styles.th}>Language</th>
+                  <th style={styles.th}>special Needs</th>
                   <th style={styles.th}>Actions</th>
                 </tr>
               </thead>
@@ -329,6 +330,8 @@ const ShowStudents = () => {
                     <td style={styles.td}>{student.academicLevel}</td>
                     <td style={styles.td}>{student.behavior}</td>
                     <td style={styles.td}>{student.language}</td>
+                    <td style={styles.td}>{student.specialNeeds}</td>
+
                     <td style={styles.td}>
                       {student.hasSubmitted ? (
                         <button
