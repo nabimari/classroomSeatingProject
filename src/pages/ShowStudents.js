@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App"; // Ensure the correct path for your App.js
 import { getAuth } from "firebase/auth";
 
+
 const ShowStudents = () => {
   const navigate = useNavigate();
   const [students, setStudents] = useState([]);
@@ -139,12 +140,14 @@ const ShowStudents = () => {
   const styles = {
     pageContainer: {
       display: "flex",
+      marginTop:"-80px",
       flexDirection: "row",
       minHeight: "100vh",
       backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
       color: theme === "light" ? "#333" : "#f9f9f9",
-      padding: "20px",
+      padding: "10px",
       boxSizing: "border-box",
+      flexWrap: "wrap",
     },
     sidebarSpacing: {
       width: "280px", // Matches the sidebar width
@@ -159,6 +162,10 @@ const ShowStudents = () => {
       boxShadow: theme === "light"
         ? "0 4px 8px rgba(0, 0, 0, 0.1)"
         : "0 4px 8px rgba(0, 0, 0, 0.5)",
+        "@media (maxWidth: 768px)": {
+          marginLeft: "0", // Remove left margin for smaller screens
+          padding: "10px", // Reduce padding
+        },
     },
     container: {
       maxWidth: "1200px",
@@ -187,6 +194,10 @@ const ShowStudents = () => {
       alignItems: "center",
       marginBottom: "25px",
       gap: "20px",
+      "@media (maxWidth: 768px)": {
+    flexDirection: "column", // Stack items vertically
+    alignItems: "stretch", // Align items to stretch full width
+  },
     },
     dropdown: {
       width: "50%",
@@ -229,7 +240,7 @@ const ShowStudents = () => {
       borderRadius: "12px",
       backgroundColor: theme === "light" ? "#ffffff" : "#2E3B4E",
       boxShadow: "0 6px 18px rgba(0, 0, 0, 0.1)",
-      overflowY: "auto",
+      overflowX: "auto",
       maxHeight: "700px",
       border: theme === "light" ? "1px solid #E0E0E0" : "1px solid #555",
     },
@@ -238,6 +249,9 @@ const ShowStudents = () => {
       borderCollapse: "collapse",
       fontFamily: "'Roboto', sans-serif",
       color: theme === "light" ? "#333" : "#F9F9F9",
+      "@media (maxWidth: 768px)": {
+    fontSize: "12px", // Smaller font for mobile
+  },
     },
     th: {
       backgroundColor: theme === "light" ? "#4CAF50" : "#3C4049",
@@ -269,7 +283,6 @@ const ShowStudents = () => {
       <div style={styles.sidebarSpacing}></div>
       <div style={styles.mainContent}>
         <header style={styles.header}>
-          <div style={styles.headerTitle}>Student Management</div>
         </header>
 
         <div style={styles.dropdownContainer}>

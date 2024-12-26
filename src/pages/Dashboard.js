@@ -1,10 +1,8 @@
 import React, { useContext } from "react";
 import { ThemeContext } from "../App";
-import { useNavigate } from "react-router-dom";
-
 const Dashboard = () => {
   const { theme } = useContext(ThemeContext);
-  const navigate = useNavigate();
+  
 
   const styles = {
     pageContainer: {
@@ -24,17 +22,18 @@ const Dashboard = () => {
       flexShrink: 0,
     },
     mainContent: {
-      flex: 1,
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: "20px",
-      backgroundColor: theme === "light" ? "#ffffff" : "#1E1E1E",
-      borderRadius: "12px",
-      boxShadow: theme === "light"
-        ? "0 4px 8px rgba(0, 0, 0, 0.1)"
-        : "0 4px 8px rgba(0, 0, 0, 0.5)",
+      position: "absolute",
+      top: "0px", // Matches the header height
+      left: "300px", // Matches the sidebar width
+      width: "calc(100% - 300px)", // Subtracts sidebar width from the total width
+      height: "calc(100vh - 80px - 60px)", // Subtracts header and footer heights from total height
+      backgroundImage: "url('/BGI.jpg')", // Path to your image
+      backgroundSize: "cover", // Ensures the image fills the container
+      backgroundPosition: "center", // Keeps the image centered
+      backgroundRepeat: "no-repeat", // Prevents tiling
+      zIndex: 0, // Ensure it stays below other elements
     },
+  
     dashboardContent: {
       textAlign: "center",
       maxWidth: "600px",
@@ -65,7 +64,7 @@ const Dashboard = () => {
       alignItems: "center",
       justifyContent: "center",
       padding: "20px 0",
-      backgroundColor: "#0d2b39",
+      backgroundColor: theme === "light" ? "#7e93a2" :"#0d2b39",
       color: "#ffffff",
       textAlign: "center",
       borderTop: "1px solid #ccc",
@@ -103,7 +102,7 @@ const Dashboard = () => {
     footerCopyright: {
       marginTop: "20px",
       fontSize: "14px",
-      color: "#bbb",
+      color: "#000",
       textAlign: "center",
     },
     socialIcons: {
@@ -150,21 +149,6 @@ const Dashboard = () => {
 
         {/* Main Content */}
         <div style={styles.mainContent}>
-          <h1 style={styles.header}>Welcome to the Dashboard</h1>
-          <div style={styles.buttonContainer}>
-            <button
-              style={{ ...styles.button, backgroundColor: "#007bff" }}
-              onClick={() => navigate("/login")}
-            >
-              Login
-            </button>
-            <button
-              style={{ ...styles.button, backgroundColor: "#28a745" }}
-              onClick={() => navigate("/register")}
-            >
-              Register
-            </button>
-          </div>
         </div>
       </div>
 

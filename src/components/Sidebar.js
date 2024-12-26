@@ -22,6 +22,22 @@ const Sidebar = () => {
   const teacherName = currentUser?.displayName || "Teacher";
   const [showAlert, setShowAlert] = useState(false);
   const location = useLocation();
+  const [isOpen, setIsOpen] = useState(false);
+  const pageTitles = {
+    "/Dashboard": "home",
+    "/my-classes": "My Classes",
+    "/show-students": "Show students for queestionnaire",
+    "/Analytics": "Analytics",
+    "/generate-seating": "Seating Arrangement",
+    "/login": "Login",
+    "/register": "Register",
+  };
+  const currentPath = location.pathname.split('/')[1]; // Get the first segment of the path
+const dynamicPaths = {
+  "questionnaire": "Questionnaire",
+  "show-results": "Questionnaire Results",
+  "view-students": "Student management",
+};
 
 
 
@@ -36,6 +52,7 @@ const Sidebar = () => {
     }
     setIsLoading(true);
     setTimeout(() => {
+      setIsOpen(false);
       setIsLoading(false);
       navigate(path);
     }, 500);
@@ -64,6 +81,7 @@ const Sidebar = () => {
       left: 0,
       width: "270px",
       height: "100vh",
+      zIndex: 1000, 
       backgroundColor: theme === "light" ? "#f4f4f4" : "#2C2C2C",
       color: theme === "light" ? "#333" : "#f9f9f9",
       boxShadow: "2px 0 8px rgba(0, 0, 0, 0.1)",
@@ -72,6 +90,7 @@ const Sidebar = () => {
       flexDirection: "column",
       justifyContent: "center",
       padding: "30px 20px",
+      transform: "translateY(-50px)", 
     },
     virtualClassroom: {
       fontSize: "45px",
@@ -79,15 +98,20 @@ const Sidebar = () => {
       color: "transparent",
       textTransform: "uppercase",
       background:
-        "linear-gradient(45deg, #13cf61, #3717eb, #a417c7, #0e0e0f, #f4f5fc, #6a1ad3, #22b8cf, #20c997)",
+      //"#7e93a2" : "#0d2b39"
+      "linear-gradient(90deg,#0d2b39,#7e93a2 , #000 ,#fff ,#7e93a2 ,#0d2b39)",
       backgroundClip: "text",
       WebkitBackgroundClip: "text",
-      backgroundSize: "300% 300%",
-      animation: "moveGradient 7s linear infinite",
-      textShadow: "2px 2px 4px rgba(0, 0, 0, 0.3)",
+      backgroundSize: "400% 400%",
+      animation: "moveGradient 8s linear infinite", // Smoother animation
+      textShadow:
+        theme === "light"
+          ? "2px 2px 4px rgba(0, 0, 0, 0.3)"
+          : "2px 2px 4px rgba(255, 255, 255, 0.3)", // Shadow for better readability
       textAlign: "center",
-      marginBottom: "50px",
+      marginBottom: "30px",
     },
+    
     welcome: {
       fontSize: "25px",
       fontWeight: "600",
@@ -170,10 +194,54 @@ const Sidebar = () => {
       cursor: "pointer",
       transition: "background-color 0.3s ease",
     },
+    Logo : {
+      
+    },
+    pageHeader: {
+      position: "fixed",
+      top: 0,
+      left: "270px", // Matches the sidebar width
+      width: "calc(100% - 270px)", // Adjusts to fit outside the sidebar
+      height: "100px", 
+      backgroundColor: theme === "light" ? "#7e93a2" : "#0d2b39", 
+      color: theme === "light" ? "#000" : "#fff", 
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      textAlign: "center",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", 
+      zIndex: 900, 
+      borderBottom: "2px solid rgba(0, 0, 0, 0.1)", 
+    },
+    
+    headerTitle: {
+      fontSize: "30px", 
+      fontWeight: "bold",
+      margin: 0,
+      textTransform: "uppercase", 
+    },
+    loginButtonContainer: {
+      position: "absolute",
+      bottom: "10px",
+      right: "10px",
+    },
+    loginButton: {
+      padding: "8px 15px",
+      fontSize: "14px",
+      fontWeight: "bold",
+      borderRadius: "8px",
+      backgroundColor: theme === "light" ? "#0d2b39" : "#6C757D",
+      color: "#fff",
+      border: "none",
+      cursor: "pointer",
+      transition: "all 0.3s ease",
+    },
   };
 
   return (
     <>
+
+  
       {isLoading && (
         <div
           style={{
@@ -192,140 +260,201 @@ const Sidebar = () => {
           <div style={styles.spinner}></div>
         </div>
       )}
+  
       {showAlert && (
-  <div
-    style={{
-      position: "fixed",
-      top: "50%",
-      left: "50%",
-      transform: "translate(-50%, -50%)",
-      backgroundColor: theme === "light" ? "#ffffff" : "#333333",
-      color: theme === "light" ? "#333" : "#f9f9f9",
-      padding: "30px",
-      borderRadius: "12px",
-      boxShadow: theme === "light"
-        ? "0 4px 8px rgba(0, 0, 0, 0.2)"
-        : "0 4px 8px rgba(255, 255, 255, 0.2)",
-      textAlign: "center",
-      zIndex: 1000,
-    }}
-  >
-    <p style={{ marginBottom: "20px", fontSize: "18px", fontWeight: "bold" }}>
-      You must log in to access this page.
-    </p>
-    <button
-      style={{
-        padding: "10px 20px",
-        border: "none",
-        borderRadius: "8px",
-        backgroundColor: theme === "light" ? "#4CAF50" : "#6C757D",
-        color: "#fff",
-        fontSize: "16px",
-        cursor: "pointer",
-      }}
-      onClick={() => setShowAlert(false)}
-    >
-      Close
-    </button>
-  </div>
-)}
-      <div style={styles.sidebar}>
-        <h1 style={styles.virtualClassroom}>Virtual Classroom</h1>
-        <div style={styles.welcome}>Welcome, {teacherName}</div>
-
-        <div style={styles.menu}>
-  <div
-    style={{...styles.menuItem,
-      ...(location.pathname === "/Dashboard" && styles.activeMenuItem),}}
-    onClick={() => handleNavigation("/Dashboard")}
-  >
-    <FaHome style={{ fontSize: "20px" }} />
-    Home
-  </div>
-  <div
-    style={{...styles.menuItem,
-      ...(location.pathname === "/my-classes" && styles.activeMenuItem),}}
-
-    onClick={() => handleNavigation("/my-classes")}
-  >
-    <FaSchool style={{ fontSize: "20px" }} />
-    My Classes
-  </div>
-  <div
-    style={{...styles.menuItem,
-      ...(location.pathname === "/show-students" && styles.activeMenuItem),}}
-
-    onClick={() => handleNavigation("/show-students")}
-  >
-    <FaListAlt style={{ fontSize: "20px" }} />
-    Questionnaire
-  </div>
-  <div
-    style={{...styles.menuItem,
-      ...(location.pathname === "/Analytics" && styles.activeMenuItem),}}
-    onClick={() => handleNavigation("/Analytics")}
-  >
-    <FaChartBar style={{ fontSize: "20px" }} />
-    Analytics
-  </div>
-  <div
-    style={{...styles.menuItem,
-      ...(location.pathname === "/generate-seating" && styles.activeMenuItem),}}
-    onClick={() => handleNavigation("/generate-seating")}
-  >
-    <FaChair style={{ fontSize: "20px" }} />
-    Seating Arrangement
-  </div>
-  {currentUser &&
-  location.pathname !== "/login" &&
- location.pathname !== "/register" &&
-  (
-    <div
-      style={styles.menuItemLogout}
-      onMouseEnter={(e) =>
-        (e.target.style.backgroundColor =  "#a40909")
+        <div
+          style={{
+            
+          }}
+        >
+          <p style={{ marginBottom: "20px", fontSize: "18px", fontWeight: "bold" }}>
+            You must log in to access this page.
+          </p>
+          <button
+            style={{
+              padding: "10px 20px",
+              border: "none",
+              borderRadius: "8px",
+              backgroundColor: theme === "light" ? "#4CAF50" : "#6C757D",
+              color: "#fff",
+              fontSize: "16px",
+              cursor: "pointer",
+            }}
+            onClick={() => setShowAlert(false)}
+          >
+            Close
+          </button>
+        </div>
+      )}
+  {/* Include @keyframes for sidebar gradient */}
+  <style>
+    {`
+      @keyframes moveGradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        100% {
+          background-position: 100% 50%;
+        }
       }
-      onMouseLeave={(e) =>
-        (e.target.style.backgroundColor = "#e51515")
+      @keyframes headerFadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
       }
-      onClick={handleLogout}
-    >
-      <FaSignOutAlt style={{ fontSize: "20px" }} />
-      Logout
+    `}
+  </style>
+
+  {/* Dynamic Header */}
+  <div style={styles.pageHeader}>
+    <h2 style={styles.headerTitle}>
+      {pageTitles[location.pathname] || dynamicPaths[currentPath]|| "Virtual ClassRoom"}
+    </h2>
+  {location.pathname === "/Dashboard" && !currentUser && (
+    <div style={styles.loginButtonContainer}>
+      <button
+        style={styles.loginButton}
+        onClick={() => navigate("/login")}
+      >
+        Log In
+      </button>
     </div>
   )}
-</div>
-
-
+  </div>
+  <button onClick={() => setIsOpen(!isOpen)} className="toggle-button">
+        ☰
+      </button>
+      <div className={`sidebar ${isOpen ? "open" : ""}`}>
+      <div style={styles.sidebar}>
+        {/* Logo Container */}
+        <div style={{ textAlign: "center", marginBottom: "20px" }}>
+          <img
+            src="/VS-Logo.jpg" 
+            alt="Logo"
+            style={{
+              width: "170px",
+              height: "170px",
+              objectFit: "contain",
+              borderRadius: "50%",
+              marginBottom: "-20px",
+              
+            }}
+          />
+        </div>
+  
+        {/* Sidebar Title */}
+        <h1 style={styles.virtualClassroom}>Virtual Classroom</h1>
+  
+        {/* Welcome Message */}
+        <div style={styles.welcome}>Welcome, {teacherName}</div>
+  
+        {/* Sidebar Menu */}
+        <div style={styles.menu}>
+          <div
+            style={{
+              ...styles.menuItem,
+              ...(location.pathname === "/Dashboard" && styles.activeMenuItem),
+            }}
+            onClick={() => handleNavigation("/Dashboard")}
+          >
+            <FaHome style={{ fontSize: "20px" }} />
+            Home
+          </div>
+          <div
+            style={{
+              ...styles.menuItem,
+              ...(location.pathname === "/my-classes" && styles.activeMenuItem),
+            }}
+            onClick={() => handleNavigation("/my-classes")}
+          >
+            <FaSchool style={{ fontSize: "20px" }} />
+            My Classes
+          </div>
+          <div
+            style={{
+              ...styles.menuItem,
+              ...(location.pathname === "/show-students" && styles.activeMenuItem),
+            }}
+            onClick={() => handleNavigation("/show-students")}
+          >
+            <FaListAlt style={{ fontSize: "20px" }} />
+            Questionnaire
+          </div>
+          <div
+            style={{
+              ...styles.menuItem,
+              ...(location.pathname === "/Analytics" && styles.activeMenuItem),
+            }}
+            onClick={() => handleNavigation("/Analytics")}
+          >
+            <FaChartBar style={{ fontSize: "20px" }} />
+            Analytics
+          </div>
+          <div
+            style={{
+              ...styles.menuItem,
+              ...(location.pathname === "/generate-seating" && styles.activeMenuItem),
+            }}
+            onClick={() => handleNavigation("/generate-seating")}
+          >
+            <FaChair style={{ fontSize: "20px" }} />
+            Seating Arrangement
+          </div>
+          {currentUser &&
+            location.pathname !== "/login" &&
+            location.pathname !== "/register" && (
+              <div
+                style={styles.menuItemLogout}
+                onMouseEnter={(e) =>
+                  (e.target.style.backgroundColor = "#a40909")
+                }
+                onMouseLeave={(e) =>
+                  (e.target.style.backgroundColor = "#e51515")
+                }
+                onClick={handleLogout}
+              >
+                <FaSignOutAlt style={{ fontSize: "20px" }} />
+                Logout
+              </div>
+            )}
+        </div>
+  
+        {/* Dark Mode Toggle */}
         <div
           style={styles.darkModeToggle}
           onMouseEnter={(e) => Object.assign(e.target.style, styles.darkModeToggleHover)}
           onMouseLeave={(e) => Object.assign(e.target.style, styles.darkModeToggle)}
           onClick={toggleTheme}
         >
-
           {theme === "light" ? (
-    <FaSun style={{ color: "#000" }} /> // Black sun for light mode
-  ) : (
-    <FaMoon style={{ color: "#FFD700" }} /> // Yellow moon for dark mode
-  )}
+            <FaSun style={{ color: "#000" }} />
+          ) : (
+            <FaMoon style={{ color: "#FFD700" }} />
+          )}
         </div>
       </div>
-
       <style>
         {`
           @keyframes moveGradient {
-            0% { background-position: 0 0; }
-            100% { background-position: 100% 100%; }
-          }
-          @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+              background-position: 0% 50%;
+            }
+            100% {
+              background-position: 100% 50%;
+            }
           }
         `}
       </style>
+      {/* Add Margin to Main Content */}
+    <div style={{ marginTop: "70px" }}>
+    </div>
+    </div>
     </>
   );
+  
 };
 
 export default Sidebar;

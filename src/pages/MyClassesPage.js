@@ -4,6 +4,7 @@ import { collection, query, where, getDocs, doc, setDoc } from "firebase/firesto
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App"; // Import ThemeContext
 
+
 const MyClassesPage = ({ teacherId, teacherName }) => {
   const [classes, setClasses] = useState([]);
   const [newClassName, setNewClassName] = useState("");
@@ -73,6 +74,7 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
       backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
       color: theme === "light" ? "#333" : "#f9f9f9",
       fontFamily: "'Roboto', sans-serif",
+      flexWrap: "wrap", // Ensures wrapping on smaller screens
     },
     sidebarSpacing: {
       width: "300px", // Matches the width of the sidebar
@@ -80,11 +82,16 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
     },
     pageContainer: {
       flex: 1,
+      marginBottom:"300px",
       display: "flex",
       flexDirection: "column",
       alignItems: "center",
       justifyContent: "center",
       padding: "20px",
+      "@media (maxWidth: 768px)": {
+    padding: "10px", // Reduce padding
+    marginBottom: "150px", // Adjust margin for smaller screens
+  },
     },
     headerTitle: {
       textAlign: "center",
@@ -98,6 +105,9 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
       padding: "0",
       width: "100%",
       maxWidth: "800px",
+      "@media (maxWidth: 768px)": {
+    maxWidth: "100%", // Use full width on smaller screens
+  },
     },
     classItem: {
       marginBottom: "15px",
@@ -111,6 +121,10 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
       display: "flex",
       justifyContent: "space-between",
       alignItems: "center",
+      flexDirection: "row",
+      "@media (maxWidth: 768px)": {
+    flexDirection: "column", // Stack items vertically on smaller screens
+  },
     },
     itemRow: {
       display: "flex",
@@ -148,6 +162,9 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
         : "0 4px 8px rgba(0, 0, 0, 0.4)",
       width: "100%",
       maxWidth: "800px",
+      "@media (maxWidth: 768px)": {
+    maxWidth: "100%", // Use full width on smaller screens
+  },
     },
     addClassHeader: {
       textAlign: "center",
@@ -176,7 +193,7 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
     },
     addClassButton: {
       padding: "10px 20px",
-      backgroundColor: theme === "light" ? "#007bff" : "#555",
+      backgroundColor:  "#007bff" ,
       color: "#fff",
       border: "none",
       borderRadius: "8px",
@@ -196,8 +213,6 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
     <div style={styles.pageLayout}> {/* New container for sidebar spacing */}
       <div style={styles.sidebarSpacing}></div> {/* Space for sidebar */}
       <div style={styles.pageContainer}>
-        <h2 style={styles.headerTitle}>My Classes</h2>
-
         {classes.length > 0 ? (
           <ul style={styles.listContainer}>
             {classes.map((classItem) => (

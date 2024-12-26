@@ -5,6 +5,7 @@ import { db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App";
 
+
 const ShowQuesResults = () => {
   const { theme } = useContext(ThemeContext);
   const { studentId } = useParams();
@@ -163,6 +164,7 @@ const ShowQuesResults = () => {
       backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
       color: theme === "light" ? "#333" : "#f9f9f9",
       fontFamily: "'Arial', sans-serif",
+      flexWrap: "wrap",
     },
     sidebarSpacing: {
       width: "300px",
@@ -177,6 +179,10 @@ const ShowQuesResults = () => {
       boxShadow: theme === "light"
         ? "0 8px 16px rgba(0, 0, 0, 0.2)"
         : "0 8px 16px rgba(0, 0, 0, 0.6)",
+        "@media (maxWidth: 768px)": {
+    marginLeft: "0", // Remove margin for smaller screens
+    padding: "10px", // Reduce padding
+  },
     },
     header: {
       textAlign: "center",
@@ -201,6 +207,7 @@ const ShowQuesResults = () => {
       border: "none",
       borderRadius: "8px",
       cursor: "pointer",
+      marginLeft:"-800px",
       transition: "background-color 0.3s ease",
       boxShadow: "0 3px 6px rgba(0, 0, 0, 0.2)",
     },
@@ -216,6 +223,9 @@ const ShowQuesResults = () => {
         ? "0 2px 8px rgba(0, 0, 0, 0.1)"
         : "0 2px 8px rgba(0, 0, 0, 0.5)",
       transition: "all 0.3s ease",
+      "@media (maxWidth: 768px)": {
+        padding: "15px", // Adjust padding for smaller screens
+      },
     },
     sectionTitle: {
       fontWeight: "bold",
@@ -254,6 +264,10 @@ const ShowQuesResults = () => {
       gap: "8px",
       fontSize: "14px",
       color: theme === "light" ? "#333" : "#f9f9f9",
+      "@media (maxWidth: 768px)": {
+    fontSize: "12px", 
+    gap: "4px", // Reduce spacing
+  },
     },
     radioInput: {
       appearance: "none",
@@ -293,6 +307,10 @@ const ShowQuesResults = () => {
       borderRadius: "8px",
       border: "none",
       cursor: "pointer",
+      "@media (maxWidth: 768px)": {
+    padding: "12px", // Adjust padding
+    fontSize: "14px", // Smaller font size
+  },
     },
     textarea: {
       width: "100%",
@@ -321,7 +339,6 @@ const ShowQuesResults = () => {
       <div style={styles.sidebarSpacing}></div> {/* Sidebar spacing */}
       <div style={styles.contentArea}>
       <div style={styles.header}>
-        <h1>Student Questionnaire</h1>
         <button
         style={styles.editButton}
         onClick={() => {

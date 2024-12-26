@@ -57,6 +57,7 @@ const RegisterPage = () => {
       color: theme === "light" ? "#333" : "#f9f9f9",
       padding: "20px",
       boxSizing: "border-box",
+      flexWrap: "wrap",
     },
     sidebarSpacing: {
       width: "300px", // Adjust according to your sidebar width
@@ -70,6 +71,10 @@ const RegisterPage = () => {
       alignItems: "center",
       justifyContent: "center",
       marginTop: "300px",
+      "@media (idth: 768px)": {
+    marginLeft: "0", // Remove left margin for smaller screens
+    marginTop: "50px", 
+  },
     },
     container: {
       padding: "40px",
@@ -80,6 +85,11 @@ const RegisterPage = () => {
         ? "0 4px 20px rgba(0, 0, 0, 0.1)"
         : "0 4px 20px rgba(0, 0, 0, 0.4)",
       fontFamily: "'Roboto', sans-serif",
+      
+      "@media (maxWidth: 768px)": {
+    width: "90%", // Reduce width for smaller screens
+    padding: "20px", // Adjust padding for compact view
+  },
     },
     header: {
       textAlign: "center",
@@ -114,6 +124,10 @@ const RegisterPage = () => {
         ? "inset 0 2px 4px rgba(0, 0, 0, 0.1)"
         : "inset 0 2px 4px rgba(255, 255, 255, 0.1)",
       transition: "all 0.3s ease",
+      "@media (maxWidth: 768px)": {
+    height: "40px", // Reduce height for smaller screens
+    fontSize: "16px", // Smaller font size for mobile
+  },
     },
     button: {
       padding: "15px",
@@ -161,7 +175,7 @@ const RegisterPage = () => {
       <div style={styles.sidebarSpacing}></div>
       <div style={styles.mainContent}>
       <div style={styles.container}>
-<h2 style={styles.header}>Register</h2>
+<h2 style={styles.header}>Sign Up</h2>
 {error && <p style={styles.error}>{error}</p>}
 <form onSubmit={handleSubmit} style={styles.form}>
 <div style={styles.inputWrapper}>
@@ -214,7 +228,7 @@ const RegisterPage = () => {
   onMouseDown={(e) => (e.target.style.transform = "scale(0.97)")}
   onMouseUp={(e) => (e.target.style.transform = "scale(1)")}
 >
-  Register
+Create Account
 </button>
 
 
