@@ -236,6 +236,10 @@ const dynamicPaths = {
       cursor: "pointer",
       transition: "all 0.3s ease",
     },
+    disabledMenuItem: {
+      opacity: 0.5,
+      cursor: "not-allowed",
+    },
   };
 
   return (
@@ -367,8 +371,9 @@ const dynamicPaths = {
             style={{
               ...styles.menuItem,
               ...(location.pathname === "/my-classes" && styles.activeMenuItem),
+              ...(currentUser ? {} : styles.disabledMenuItem),
             }}
-            onClick={() => handleNavigation("/my-classes")}
+            onClick={currentUser ? () => handleNavigation("/my-classes") : null}
           >
             <FaSchool style={{ fontSize: "20px" }} />
             My Classes
@@ -377,8 +382,9 @@ const dynamicPaths = {
             style={{
               ...styles.menuItem,
               ...(location.pathname === "/show-students" && styles.activeMenuItem),
+              ...(currentUser ? {} : styles.disabledMenuItem),
             }}
-            onClick={() => handleNavigation("/show-students")}
+            onClick={currentUser ? () => handleNavigation("/show-students") : null}
           >
             <FaListAlt style={{ fontSize: "20px" }} />
             Questionnaire
@@ -387,22 +393,27 @@ const dynamicPaths = {
             style={{
               ...styles.menuItem,
               ...(location.pathname === "/Analytics" && styles.activeMenuItem),
+              ...(currentUser ? {} : styles.disabledMenuItem),
             }}
-            onClick={() => handleNavigation("/Analytics")}
+            onClick={currentUser ? () => handleNavigation("/Analytics") : null}
           >
             <FaChartBar style={{ fontSize: "20px" }} />
             Analytics
           </div>
-          <div
+          
+            <div
             style={{
               ...styles.menuItem,
               ...(location.pathname === "/generate-seating" && styles.activeMenuItem),
+              ...(currentUser ? {} : styles.disabledMenuItem),
             }}
-            onClick={() => handleNavigation("/generate-seating")}
+            onClick={currentUser ? () => handleNavigation("/generate-seating") : null}
           >
             <FaChair style={{ fontSize: "20px" }} />
             Seating Arrangement
           </div>
+          
+          
           {currentUser &&
             location.pathname !== "/login" &&
             location.pathname !== "/register" && (
