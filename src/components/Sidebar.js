@@ -237,8 +237,8 @@ const dynamicPaths = {
       transition: "all 0.3s ease",
     },
     disabledMenuItem: {
-      opacity: 0.5,
-      cursor: "not-allowed",
+      opacity: 0,
+      display:"none",
     },
   };
 
@@ -367,6 +367,7 @@ const dynamicPaths = {
             <FaHome style={{ fontSize: "20px" }} />
             Home
           </div>
+          
           <div
             style={{
               ...styles.menuItem,
