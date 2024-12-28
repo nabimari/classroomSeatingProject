@@ -207,7 +207,7 @@ const ShowQuesResults = () => {
       border: "none",
       borderRadius: "8px",
       cursor: "pointer",
-      left : 0,
+      marginLeft:"-800px",
       transition: "background-color 0.3s ease",
       boxShadow: "0 3px 6px rgba(0, 0, 0, 0.2)",
     },

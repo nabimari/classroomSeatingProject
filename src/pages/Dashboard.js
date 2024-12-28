@@ -8,7 +8,7 @@ const Dashboard = () => {
     pageContainer: {
       display: "flex",
       flexDirection: "column",
-      minHeight: "99.1vh",
+      minHeight: "100vh",
       backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
       color: theme === "light" ? "#333" : "#f9f9f9",
       boxSizing: "border-box",

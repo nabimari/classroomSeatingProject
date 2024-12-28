@@ -6,6 +6,7 @@ import { db, auth } from "../firebase"
 import { ThemeContext } from "../App" 
 import { sendPasswordResetEmail } from "firebase/auth"
 import { FaUser, FaLock } from "react-icons/fa"
+
   
 const LoginPage = () => {
  const { theme } = useContext(ThemeContext)
@@ -103,7 +104,6 @@ const LoginPage = () => {
     } catch (err) {
       setAlertMessage("Incorrect Login ID and/or password.")
       setAlertType("error")
-      navigate("/login")
       setTimeout(() => setAlertMessage(""), 2000)
     }
   }
@@ -159,7 +159,7 @@ const LoginPage = () => {
           : "0 4px 20px rgba(0, 0, 0, 0.4)",
         fontFamily: "'Roboto', sans-serif",
         transform: "translateY(0)",
-        "@media (maxWidth: 768px)": {
+        "@media (max-width: 768px)": {
     padding: "20px", // Reduce padding for smaller screens
     maxWidth: "90%", // Adjust max width for small screens
   },
@@ -240,10 +240,10 @@ const LoginPage = () => {
           : "0 2px 4px rgba(255, 255, 255, 0.1)",
       },
       alertMessage: {
-        position: "fixed", // Use fixed positioning to ensure it stays relative to the viewport
-        top: "170px", // Maintain the Y coordinate
-        left: "50%", // Center horizontally in the viewport
-        transform: "translateX(-10%)", // Adjust for the element's width
+        position: "absolute",
+        top: "150px",
+        left: "60%",
+        transform: "translateX(-50%)",
         backgroundColor: alertType === "success" ? "#4CAF50" : "#F44336",
         color: "#fff",
         padding: "15px",
@@ -256,7 +256,6 @@ const LoginPage = () => {
         alignItems: "center",
         gap: "10px",
       },
-      
       inputWrapper: {
         position: "relative",
         width: "95%", // Matches the width of the input field
