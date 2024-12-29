@@ -226,16 +226,20 @@ const dynamicPaths = {
       right: "10px",
     },
     loginButton: {
-      padding: "8px 15px",
-      fontSize: "14px",
+      padding: "12px 20px", // Larger padding for better clickability
+      fontSize: "18px", // Slightly larger font for readability
       fontWeight: "bold",
-      borderRadius: "8px",
-      backgroundColor: theme === "light" ? "#0d2b39" : "#6C757D",
-      color: "#fff",
+      borderRadius: "12px", // Smoother corners for a modern look
+      backgroundColor: theme === "light" ? "#000" : "#fff", // Bright and noticeable colors
+      color: theme === "light" ? "#fff" : "#000", // Ensure high contrast for readability
       border: "none",
       cursor: "pointer",
+      textTransform: "uppercase", // Make text stand out
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)", // Add depth with shadow
       transition: "all 0.3s ease",
+      animation: "pulse 1.2s infinite",
     },
+    
   };
 
   return (
@@ -305,6 +309,17 @@ const dynamicPaths = {
           opacity: 1;
         }
       }
+        @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.1);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
     `}
   </style>
 
@@ -313,10 +328,17 @@ const dynamicPaths = {
     <h2 style={styles.headerTitle}>
       {pageTitles[location.pathname] || dynamicPaths[currentPath]|| "Virtual ClassRoom"}
     </h2>
-  {location.pathname === "/Dashboard" && !currentUser && (
+  {(location.pathname === "/Dashboard" || location.pathname === "/register") && !currentUser && (
     <div style={styles.loginButtonContainer}>
       <button
         style={styles.loginButton}
+        onMouseEnter={(e) => {
+          e.target.style.animation = "pulse 1.2s infinite"; // Add animation
+          e.target.style.transform = "scale(1.1)"; 
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.transform = ""; // Reset size
+        }}
         onClick={() => navigate("/login")}
       >
         Log In

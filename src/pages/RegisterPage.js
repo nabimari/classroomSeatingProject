@@ -71,10 +71,10 @@ const RegisterPage = () => {
     pageContainer: {
       display: "flex",
       flexDirection: "row",
-      minHeight: "100vh",
       backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
       color: theme === "light" ? "#333" : "#f9f9f9",
       padding: "20px",
+      marginRight:"150px",
       boxSizing: "border-box",
       flexWrap: "wrap",
     },
@@ -97,7 +97,7 @@ const RegisterPage = () => {
     },
     container: {
       position: "relative",
-      padding: "40px",
+      padding: "14px",
       backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
       color: theme === "light" ? "#333" : "#f9f9f9",
       borderRadius: "12px",
@@ -105,6 +105,7 @@ const RegisterPage = () => {
         ? "0 4px 20px rgba(0, 0, 0, 0.1)"
         : "0 4px 20px rgba(0, 0, 0, 0.4)",
       fontFamily: "'Roboto', sans-serif",
+      
       
       
       "@media (maxWidth: 768px)": {
@@ -207,7 +208,7 @@ const RegisterPage = () => {
 
 
   return (
-    <div style={styles.container}>
+    <div style={styles.pageContainer}>
       <div style={styles.sidebarSpacing}></div>
       <div style={styles.mainContent}>
       <div style={styles.container}>
