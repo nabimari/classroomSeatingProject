@@ -1,7 +1,8 @@
 import React, { useContext, useState } from "react";
 import { useNavigate ,useLocation} from "react-router-dom";
-import { getAuth, signOut } from "firebase/auth";
+import { logout } from "../services/authHandler"; 
 import { ThemeContext } from "../App";
+import { auth } from "../firebase"
 import {
   FaSun,
   FaMoon,
@@ -17,7 +18,6 @@ const Sidebar = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const auth = getAuth();
   const currentUser = auth.currentUser;
   const teacherName = currentUser?.displayName || "Teacher";
   const [showAlert, setShowAlert] = useState(false);
@@ -58,20 +58,20 @@ const dynamicPaths = {
     }, 500);
   };
 
-  const handleLogout = () => {
-    setIsLoading(true);
-    setTimeout(() => {
-      signOut(auth)
-        .then(() => {
-          setIsLoading(false);
-          navigate("/login");
-        })
-        .catch((error) => {
-          setIsLoading(false);
-          console.error("Error during logout: ", error);
-          alert("Failed to log out. Please try again.");
-        });
-    }, 500);
+  const handleLogout = async () => {
+    try {
+      setIsLoading(true);
+  
+      
+      await Promise.all([logout(), new Promise((resolve) => setTimeout(resolve, 1000))]);
+  
+      navigate("/login");
+    } catch (error) {
+      console.error("Error during logout: ", error);
+      alert("Failed to log out. Please try again.");
+    } finally {
+      setIsLoading(false); 
+    }
   };
 
   const styles = {
@@ -363,63 +363,66 @@ const dynamicPaths = {
             <FaHome style={{ fontSize: "20px" }} />
             Home
           </div>
-          <div
-            style={{
-              ...styles.menuItem,
-              ...(location.pathname === "/my-classes" && styles.activeMenuItem),
-            }}
-            onClick={() => handleNavigation("/my-classes")}
-          >
-            <FaSchool style={{ fontSize: "20px" }} />
-            My Classes
-          </div>
-          <div
-            style={{
-              ...styles.menuItem,
-              ...(location.pathname === "/show-students" && styles.activeMenuItem),
-            }}
-            onClick={() => handleNavigation("/show-students")}
-          >
-            <FaListAlt style={{ fontSize: "20px" }} />
-            Questionnaire
-          </div>
-          <div
-            style={{
-              ...styles.menuItem,
-              ...(location.pathname === "/Analytics" && styles.activeMenuItem),
-            }}
-            onClick={() => handleNavigation("/Analytics")}
-          >
-            <FaChartBar style={{ fontSize: "20px" }} />
-            Analytics
-          </div>
-          <div
-            style={{
-              ...styles.menuItem,
-              ...(location.pathname === "/generate-seating" && styles.activeMenuItem),
-            }}
-            onClick={() => handleNavigation("/generate-seating")}
-          >
-            <FaChair style={{ fontSize: "20px" }} />
-            Seating Arrangement
-          </div>
-          {currentUser &&
-            location.pathname !== "/login" &&
-            location.pathname !== "/register" && (
+          {currentUser && (
+            <>
               <div
-                style={styles.menuItemLogout}
-                onMouseEnter={(e) =>
-                  (e.target.style.backgroundColor = "#a40909")
-                }
-                onMouseLeave={(e) =>
-                  (e.target.style.backgroundColor = "#e51515")
-                }
-                onClick={handleLogout}
+                style={{
+                  ...styles.menuItem,
+                  ...(location.pathname === "/my-classes" && styles.activeMenuItem),
+                }}
+                onClick={() => handleNavigation("/my-classes")}
               >
-                <FaSignOutAlt style={{ fontSize: "20px" }} />
-                Logout
+                <FaSchool style={{ fontSize: "20px" }} />
+                My Classes
               </div>
-            )}
+              <div
+                style={{
+                  ...styles.menuItem,
+                  ...(location.pathname === "/show-students" && styles.activeMenuItem),
+                }}
+                onClick={() => handleNavigation("/show-students")}
+              >
+                <FaListAlt style={{ fontSize: "20px" }} />
+                Questionnaire
+              </div>
+              <div
+                style={{
+                  ...styles.menuItem,
+                  ...(location.pathname === "/Analytics" && styles.activeMenuItem),
+                }}
+                onClick={() => handleNavigation("/Analytics")}
+              >
+                <FaChartBar style={{ fontSize: "20px" }} />
+                Analytics
+              </div>
+              <div
+                style={{
+                  ...styles.menuItem,
+                  ...(location.pathname === "/generate-seating" && styles.activeMenuItem),
+                }}
+                onClick={() => handleNavigation("/generate-seating")}
+              >
+                <FaChair style={{ fontSize: "20px" }} />
+                Seating Arrangement
+              </div>
+              {location.pathname !== "/login" &&
+                location.pathname !== "/register" && (
+                  <div
+                    style={styles.menuItemLogout}
+                    onMouseEnter={(e) =>
+                      (e.target.style.backgroundColor = "#a40909")
+                    }
+                    onMouseLeave={(e) =>
+                      (e.target.style.backgroundColor = "#e51515")
+                    }
+                    onClick={handleLogout}
+                  >
+                    <FaSignOutAlt style={{ fontSize: "20px" }} />
+                    Logout
+                  </div>
+                )}
+            </>
+          )}
         </div>
   
         {/* Dark Mode Toggle */}

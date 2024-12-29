@@ -1,8 +1,8 @@
 import React, { useState, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, setDoc, collection, query, where, getDocs,updateDoc } from "firebase/firestore";
-import { db } from "../firebase";
-import { ThemeContext } from "../App"; // Ensure you import ThemeContext from App.js
+import { ThemeContext } from "../App"; 
+import { saveQuestionnaireResponse, updateStudentMainInfo } from "../services/studentHandler";
+
 
 
 const Questionnaire = () => {
@@ -36,25 +36,12 @@ if (
   return;
 }
     try {
-      const q = query(collection(db, "Students"), where("id", "==", studentId));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        console.log("No matching documents found.");
-        return;
-      }
-
-      querySnapshot.forEach(async (studentDoc) => {
-        const studentRef = doc(db, "Students", studentDoc.id, "Questionnaire", "Responses");
-        await setDoc(studentRef, { ...responses });
-        const studentMainRef = doc(db, "Students", studentDoc.id);
-
-      await updateDoc(studentMainRef, {
-        academicLevel: responses["Academic Performance"]["Rate performance"],
-        behavior: responses["Behavioral and Social Traits"]["Behavior rating"],
-        specialNeeds: responses["Special Needs"]["Special accommodations"],
-      });
-      });
+      await saveQuestionnaireResponse(studentId, responses);
+    await updateStudentMainInfo(studentId, {
+      academicLevel: responses["Academic Performance"]["Rate performance"],
+      behavior: responses["Behavioral and Social Traits"]["Behavior rating"],
+      specialNeeds: responses["Special Needs"]["Special accommodations"],
+    });
 
       alert("Responses saved successfully!");
       navigate("/show-students");

@@ -1,11 +1,9 @@
 import React, { useState, useContext, useEffect } from "react"
-import { signInWithEmailAndPassword } from "firebase/auth"
 import { useNavigate } from "react-router-dom"
-import { doc, getDoc, getDocs, collection } from "firebase/firestore"
-import { db, auth } from "../firebase"
 import { ThemeContext } from "../App" 
-import { sendPasswordResetEmail } from "firebase/auth"
 import { FaUser, FaLock } from "react-icons/fa"
+import { resetPassword,signInUser } from "../services/authHandler";
+import { getAllTeachers,getTeacherById } from "../services/teacherHandler";
 
   
 const LoginPage = () => {
@@ -39,13 +37,10 @@ const LoginPage = () => {
       return
     }
 
-      const teachersCollection = collection(db, "Teachers")
-      const existingEmails = await getDocs(teachersCollection)
-      
-      const doesEmailExist = existingEmails.docs.some((doc) => {
-        const data = doc.data()
-        return data.email === forgotEmail
-      })
+    try {
+      const teachers = await getAllTeachers();
+      const doesEmailExist = teachers.some((teacher) => teacher.email === forgotEmail);
+  
   
       if (!doesEmailExist) {
         setForgotError("Email not found. Please check the entered email.")
@@ -53,21 +48,19 @@ const LoginPage = () => {
         return
       }
   
-      sendPasswordResetEmail(auth, forgotEmail)
-        .then(() => {
+        await resetPassword(forgotEmail);
           setForgotSuccess("Password reset email sent. Please check your inbox.")
           setForgotError("") 
-        })
-        .catch((error) => {
+        }catch(error){
           if (error.message === 'Firebase: Error (auth/invalid-email).') {
             setForgotError("Invalid email. Please try again.")
             setForgotSuccess("")
           } else {
             console.error("Error sending password reset email: ", error)
             setForgotError("Failed to send password reset email. Please try again.")
-            setForgotSuccess("") 
           }
-        })
+          setForgotSuccess("") 
+        }
   }
 
   const handleChange = (e) => {
@@ -75,38 +68,57 @@ const LoginPage = () => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
+    e.preventDefault();
+  
     if (rememberMe) {
-      localStorage.setItem("email", formData.email)
+      localStorage.setItem("email", formData.email);
     } else {
-      localStorage.removeItem("email")
+      localStorage.removeItem("email");
     }
+  
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      )
-
-      const teacherDoc = await getDoc(doc(db, "Teachers", userCredential.user.uid))
+      let emailToUse = formData.email;
+  
+      // Check if input is a username
+      if (!formData.email.includes("@")) {
+        const teachers = await getAllTeachers();
+  
+        // Normalize username to lowercase for comparison
+        const matchedTeacher = teachers.find(
+          (teacher) => teacher.name.toLowerCase() === formData.email.toLowerCase()
+        );
+  
+        if (!matchedTeacher) {
+          throw new Error("Username not found. Please check and try again.");
+        }
+  
+        emailToUse = matchedTeacher.email; // Use the email linked to the username
+      }
+  
+      
+      const user = await signInUser(emailToUse, formData.password);
+  
+      const teacherDoc = await getTeacherById(user.uid);
       if (teacherDoc.exists()) {
-        console.log("Teacher Data:", teacherDoc.data())
-        setAlertMessage("Logged in successfully!")
-        setAlertType("success")
-
+        console.log("Teacher Data:", teacherDoc.data());
+        setAlertMessage("Logged in successfully!");
+        setAlertType("success");
+  
         setTimeout(() => {
-          setAlertMessage("")
-          navigate("/Dashboard")
-        }, 2000)
+          setAlertMessage("");
+          navigate("/Dashboard");
+        }, 2000);
       } else {
-        throw new Error("No teacher record found. Please contact support.")
+        throw new Error("No teacher record found. Please contact support.");
       }
     } catch (err) {
-      setAlertMessage("Incorrect Login ID and/or password.")
-      setAlertType("error")
-      setTimeout(() => setAlertMessage(""), 2000)
+      setAlertMessage(err.message || "Incorrect Login ID and/or password.");
+      setAlertType("error");
+      setTimeout(() => setAlertMessage(""), 2000);
     }
-  }
+  };
+  
+  
 
  const handleRememberMe = () => {
   const newValue = !rememberMe;

@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
-import { collection, doc, getDoc, getDocs, query, setDoc, where,updateDoc } from "firebase/firestore";
-import { db } from "../firebase";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App";
+import { getQuestionnaireResponses ,saveQuestionnaireResponse, updateStudentMainInfo} from "../services/studentHandler";
+
+
+
 
 
 const ShowQuesResults = () => {
@@ -81,32 +83,20 @@ const ShowQuesResults = () => {
   useEffect(() => {
     const fetchResponses = async () => {
       try {
-        // Query to find the student document by "id"
-        const q = query(collection(db, "Students"), where("id", "==", studentId));
-        const querySnapshot = await getDocs(q);
+        const response = await getQuestionnaireResponses(studentId);
 
-        let docSnap;
-        for (const studentDoc of querySnapshot.docs) {
-          // Reference the "Questionnaire" sub-collection document
-          const studentRef = doc(db, "Students", studentDoc.id, "Questionnaire", "Responses");
 
-          // Fetch the document
-          docSnap = await getDoc(studentRef);
-
-          if (docSnap.exists()) {
-            setResponses(docSnap.data()); // Save responses to state
-            console.log("Questionnaire responses:", docSnap.data());
-            break; // Exit the loop after finding the document
+          if (response) {
+            setResponses(response); // Save responses to state
+            console.log("Questionnaire responses:", response);
+            
+          } else {
+            console.log("No questionnaire responses found.");
           }
-        }
-
-        if (!docSnap || !docSnap.exists()) {
-          console.log("No such document! No questionnaire responses found.");
-        }
-      } catch (error) {
+        }catch (error) {
         console.error("Error fetching questionnaire responses: ", error);
       } finally {
-        setLoading(false); // Ensure loading spinner stops
+        setLoading(false); 
       }
     };
 
@@ -127,31 +117,18 @@ const ShowQuesResults = () => {
 
   const handleSave = async () => {
     try {
-      // Step 1: Query the "Students" collection to find the document
-      const q = query(collection(db, "Students"), where("id", "==", studentId));
-      const querySnapshot = await getDocs(q);
+      await saveQuestionnaireResponse(studentId, responses);
 
-      // Step 2: Check if the student document exists
-      if (!querySnapshot.empty) {
-        querySnapshot.forEach(async (docSnapshot) => {
-          const responsesRef = doc(db, "Students", docSnapshot.id, "Questionnaire", "Responses");
-      // Step 4: Update the fields in the "Responses" document
-         await setDoc(responsesRef, responses, { merge: true });
 
-         const studentMainRef = doc(db, "Students", docSnapshot.id);
-         await updateDoc(studentMainRef, {
-
-           academicLevel: responses["Academic Performance"]["Rate performance"],
-           behavior: responses["Behavioral and Social Traits"]["Behavior rating"],
-           specialNeeds: responses["Special Needs"]["Special accommodations"],
-         });
+      await updateStudentMainInfo(studentId, {
+        academicLevel: responses["Academic Performance"]["Rate performance"],
+        behavior: responses["Behavioral and Social Traits"]["Behavior rating"],
+        specialNeeds: responses["Special Needs"]["Special accommodations"],
+      });
           alert("Responses saved successfully!");
           navigate("/show-students")
-        });
-      } else {
-        console.log("No document found for the given student ID.");
-      }
-    } catch (error) {
+        
+      } catch (error) {
       console.error("Error saving responses:", error);
     }
   };
@@ -207,7 +184,7 @@ const ShowQuesResults = () => {
       border: "none",
       borderRadius: "8px",
       cursor: "pointer",
-      marginLeft:"-800px",
+      left: 0,
       transition: "background-color 0.3s ease",
       boxShadow: "0 3px 6px rgba(0, 0, 0, 0.2)",
     },

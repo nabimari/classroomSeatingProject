@@ -1,9 +1,7 @@
 import React, { useEffect, useState ,useContext} from "react";
-import { db } from "../firebase"; // Import Firebase Firestore instance
-import { collection, query, where, getDocs, doc, setDoc } from "firebase/firestore"; // Ensure doc and setDoc are imported
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App"; // Import ThemeContext
-
+import { getClassesByTeacherID, addNewClass } from "../services/classHandler";
 
 const MyClassesPage = ({ teacherId, teacherName }) => {
   const [classes, setClasses] = useState([]);
@@ -16,15 +14,7 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
   useEffect(() => {
     const fetchClasses = async () => {
       try {
-        const classesRef = collection(db, "Classes");
-        const q = query(classesRef, where("teacherId", "==", teacherId));
-        const querySnapshot = await getDocs(q);
-
-        const fetchedClasses = [];
-        querySnapshot.forEach((doc) => {
-          fetchedClasses.push({ id: doc.id, ...doc.data() });
-        });
-
+        const fetchedClasses = await getClassesByTeacherID(teacherId);
         setClasses(fetchedClasses);
       } catch (err) {
         console.error("Error fetching classes:", err.message);
@@ -36,32 +26,18 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
 
   // Add a new class
   const handleAddClass = async () => {
-    console.log("Adding class:", { newClassName, teacherId, teacherName });
-    if (newClassName.trim()) {
-      const classId = newClassName.replace(/\s+/g, "-").toLowerCase(); // Class ID generated from name
-      try {
-        const classRef = doc(db, "Classes", classId);
-        await setDoc(classRef, {
-          name: newClassName,
-          teacherId: teacherId,
-          teacherName: teacherName,
-          students: [],
-        });
-
-        setClasses((prev) => [
-          ...prev,
-          { id: classId, name: newClassName, students: [] },
-        ]);
-
-        console.log("Class added successfully to Firestore.");
-        alert("Class added successfully!");
-        setNewClassName(""); // Reset input field
-      } catch (err) {
-        console.error("Error adding class to Firestore:", err.message);
-        alert(`Error: ${err.message}`);
-      }
-    } else {
+    if (!newClassName.trim()) {
       alert("Please provide a valid class name.");
+      return;
+    }
+    try {
+      const newClass = await addNewClass(newClassName, teacherId, teacherName);
+      setClasses((prev) => [...prev, newClass]);
+      alert("Class added successfully!");
+      setNewClassName("");
+    } catch (err) {
+      console.error("Error adding class:", err.message);
+      alert(`Error: ${err.message}`);
     }
   };
 

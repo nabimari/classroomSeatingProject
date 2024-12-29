@@ -1,10 +1,11 @@
 import React, { useState, useContext } from "react";
-import { getAuth, createUserWithEmailAndPassword , updateProfile } from "firebase/auth";
-import { db } from "../firebase"; // Ensure the correct path to your firebase.js file
-import { doc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { ThemeContext } from "../App"; // Import ThemeContext
 import { FaUser, FaEnvelope, FaLock } from "react-icons/fa";
+import { registerUser } from "../services/authHandler"; 
+import { addTeacher } from "../services/teacherHandler"; 
+
+
 
 
 const RegisterPage = () => {
@@ -23,20 +24,12 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const auth = getAuth();
+
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
-      const user = userCredential.user;
-      await updateProfile(user, {
-        displayName: formData.name
-      })
+      const user = await registerUser(formData.email, formData.password, formData.name);
 
       // Save teacher details to Firestore
-      await setDoc(doc(db, "Teachers", user.uid), {
+      await addTeacher(user.uid, {
         name: formData.name,
         email: formData.email,
       });

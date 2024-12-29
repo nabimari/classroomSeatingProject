@@ -1,12 +1,12 @@
 import React, { useEffect, useState ,useContext} from "react";
-import { db } from "../firebase";
-import { doc, getDocs, updateDoc, arrayUnion, arrayRemove, collection, addDoc, query, where } from "firebase/firestore";
 import { useParams } from "react-router-dom";
 import { ThemeContext } from "../App"; // Import ThemeContext
+import {getStudentsByClassID,updateStudentMainInfo,addStudentToClass,removeStudent} from "../services/studentHandler"
 
 
 
-const ViewStudentsPage = ({ teacherName }) => {
+
+const ViewStudentsPage = ({ teacherName  }) => {
   const { classId } = useParams();
   const [classData, setClassData] = useState(null);
   const [newStudent, setNewStudent] = useState({
@@ -23,20 +23,12 @@ const ViewStudentsPage = ({ teacherName }) => {
   useEffect(() => {
     const fetchClassData = async () => {
       try {
-        const studentsQuery = query(
-          collection(db, "Students"),
-          where("classId", "==", classId) // Filter by the classId
-        );
-        const querySnapshot = await getDocs(studentsQuery);
-        const studentsData = querySnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-  
+        const studentsData = await getStudentsByClassID(classId);
+
         setClassData({
-          id: classId, // Keep the `classData` format consistent
-          name: `Class ${classId}`, // Dummy name or replace with actual class name if needed
-          students: studentsData, // Set fetched students
+          id: classId, 
+          name: `Class ${classId}`, 
+          students: studentsData, 
         });
       } catch (err) {
         console.error("Error fetching class data:", err.message);
@@ -78,16 +70,11 @@ const ViewStudentsPage = ({ teacherName }) => {
     };
 
     try {
-      const studentRef = await addDoc(collection(db, "Students"), newStudentObject);
-
-      const classRef = doc(db, "Classes", classId);
-      await updateDoc(classRef, {
-        students: arrayUnion({ id: studentRef.id, ...newStudentObject }),
-      });
+      const studentId = await addStudentToClass(newStudentObject);
 
       setClassData((prev) => ({
         ...prev,
-        students: [...prev.students, { id: studentRef.id, ...newStudentObject }],
+        students: [...prev.students, { id: studentId, ...newStudentObject }],
       }));
 
       setNewStudent({
@@ -106,11 +93,7 @@ const ViewStudentsPage = ({ teacherName }) => {
 
   const handleDeleteStudent = async (student) => {
     try {
-      const classRef = doc(db, "Classes", classId);
-      await updateDoc(classRef, {
-        students: arrayRemove(student),
-      });
-
+      await removeStudent(classId, student.id);
       setClassData((prev) => ({
         ...prev,
         students: prev.students.filter((s) => s.id !== student.id),
@@ -143,21 +126,20 @@ const ViewStudentsPage = ({ teacherName }) => {
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
-
+  
     if (newStudent.age > 18) {
       alert("Age must be 18 or below. This system is for school students only.");
       return;
     }
-
+  
     try {
-      const updatedStudents = classData.students.map((student) =>
-        student.id === editingStudent.id ? { ...newStudent } : student
-      );
-
-      const classRef = doc(db, "Classes", classId);
-      await updateDoc(classRef, { students: updatedStudents });
-
-      setClassData((prev) => ({ ...prev, students: updatedStudents }));
+      await updateStudentMainInfo(editingStudent.id, { ...newStudent });
+      setClassData((prev) => ({
+        ...prev,
+        students: prev.students.map((student) =>
+          student.id === editingStudent.id ? { ...newStudent } : student
+        ),
+      }));
       setEditingStudent(null);
       setNewStudent({
         name: "",
@@ -172,6 +154,8 @@ const ViewStudentsPage = ({ teacherName }) => {
       console.error("Error updating student:", err.message);
     }
   };
+  
+
 
 
   const styles = {

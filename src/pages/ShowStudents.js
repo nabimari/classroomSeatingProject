@@ -1,9 +1,10 @@
 import React, { useState, useContext, useEffect } from "react";
-import { collection, getDocs, doc, getDoc, query, where } from "firebase/firestore";
-import { db } from "../firebase"; // Ensure the correct path for your firebase.js
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App"; // Ensure the correct path for your App.js
-import { getAuth } from "firebase/auth";
+import { getCurrentUser } from "../services/authHandler";
+import { getClassesByTeacherID } from "../services/classHandler";
+import { getStudentsByClassID } from "../services/studentHandler";
+
 
 
 const ShowStudents = () => {
@@ -32,29 +33,17 @@ const ShowStudents = () => {
   // Fetch list of classes
   useEffect(() => {
     const fetchClasses = async () => {
-      const auth = getAuth(); // Initialize Firebase Auth
-      const currentUser = auth.currentUser; // Get the currently logged-in user
-      const teacherId = currentUser?.uid; // Get the teacher's ID
-
+      const currentUser = getCurrentUser();
+      const teacherId = currentUser?.uid;
       if (!teacherId) {
         console.error("No teacher ID found. Please log in.");
         return;
       }
 
       try {
-        const classesRef = collection(db, "Classes");
+        const fetchedClasses = await getClassesByTeacherID(teacherId);
 
-        // Query to filter classes with the same teacherId
-        const q = query(classesRef, where("teacherId", "==", teacherId));
-        const querySnapshot = await getDocs(q);
-
-        // Map the results to an array
-        const classesList = querySnapshot.docs.map((docSnapshot) => ({
-          id: docSnapshot.id,
-          ...docSnapshot.data(),
-        }));
-
-        setClasses(classesList); // Update state with the filtered classes
+        setClasses(fetchedClasses); // Update state with the filtered classes
       } catch (error) {
         console.error("Error fetching classes: ", error);
       }
@@ -66,70 +55,22 @@ const ShowStudents = () => {
   const fetchStudents = async () => {
     try {
       setLoading(true); // Start loading animation
-      let studentList = [];
-
-      if (selectedClass) {
-        // Fetch students from the selected class
-        const classRef = doc(db, "Classes", selectedClass);
-        const classDoc = await getDoc(classRef);
-
-        if (classDoc.exists()) {
-          const studentData = classDoc.data()?.students || []; // Array of student data with field "ID"
-          const studentIds = studentData.map((student) => student.id); // Extract only the ID fields
-
-          if (studentIds.length > 0) {
-            // Query Students collection where the "id" field matches any value in studentIds
-            const batchSize = 10; // Firestore 'in' query allows up to 10 values at a time
-
-            // Process the student IDs in batches of 10
-            for (let i = 0; i < studentIds.length; i += batchSize) {
-              const batch = studentIds.slice(i, i + batchSize); // Get a batch of up to 10 IDs
-
-              const studentsQuery = query(
-                collection(db, "Students"),
-                where("id", "in", batch) // Match the "id" field in the Students collection
-              );
-
-              const studentsSnapshot = await getDocs(studentsQuery);
-
-              // Fetch Questionnaire/Responses for each matching student
-              const batchResults = await Promise.all(
-                studentsSnapshot.docs.map(async (studentDoc) => {
-                  const studentRef = studentDoc.ref;
-
-                  // Fetch Questionnaire/Responses document
-                  const questionnaireRef = doc(studentRef, "Questionnaire", "Responses");
-                  const questionnaireDoc = await getDoc(questionnaireRef);
-
-                  // Return student data along with additional info
-                  return {
-                    id: studentDoc.id, // Document ID
-                    ...studentDoc.data(), // Student data fields
-                    hasSubmitted: questionnaireDoc.exists(), // Check if Responses exists
-                  };
-                })
-              );
-
-              // Add results to the final student list
-              studentList.push(...batchResults);
-            }
-
-            console.log("Final Student List:", studentList);
-          } else {
-            console.log("No student IDs found in the class data.");
-          }
-        }
-       }
-
-      setTimeout(() => {
-        setStudents(studentList);
-        setShowSearch(true);
-        setShowFetchButton(false);
-        setLoading(false); // End loading animation
-      }, 2000); // Simulate 2-second loading animation
+  
+      if (!selectedClass) {
+        console.log("No class selected.");
+        setLoading(false);
+        return;
+      }
+  
+      const studentList = await getStudentsByClassID(selectedClass);
+  
+      setStudents(studentList);
+      setShowSearch(true);
+      setShowFetchButton(false);
     } catch (error) {
       console.error("Error fetching students: ", error);
-      setLoading(false); // Ensure loading stops on error
+    } finally {
+      setLoading(false); // Ensure loading animation ends
     }
   };
 
