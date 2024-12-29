@@ -68,53 +68,32 @@ const LoginPage = () => {
   }
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-  
+    e.preventDefault()
     if (rememberMe) {
-      localStorage.setItem("email", formData.email);
+      localStorage.setItem("email", formData.email)
     } else {
-      localStorage.removeItem("email");
+      localStorage.removeItem("email")
     }
-  
     try {
-      let emailToUse = formData.email;
-  
-      // Check if input is a username
-      if (!formData.email.includes("@")) {
-        const teachers = await getAllTeachers();
-  
-        // Normalize username to lowercase for comparison
-        const matchedTeacher = teachers.find(
-          (teacher) => teacher.name.toLowerCase() === formData.email.toLowerCase()
-        );
-  
-        if (!matchedTeacher) {
-          throw new Error("Username not found. Please check and try again.");
-        }
-  
-        emailToUse = matchedTeacher.email; // Use the email linked to the username
-      }
-  
-      
-      const user = await signInUser(emailToUse, formData.password);
-  
+      const user = await signInUser(formData.email, formData.password);
+
       const teacherDoc = await getTeacherById(user.uid);
       if (teacherDoc.exists()) {
-        console.log("Teacher Data:", teacherDoc.data());
-        setAlertMessage("Logged in successfully!");
-        setAlertType("success");
-  
+        console.log("Teacher Data:", teacherDoc.data())
+        setAlertMessage("Logged in successfully!")
+        setAlertType("success")
+
         setTimeout(() => {
-          setAlertMessage("");
-          navigate("/Dashboard");
-        }, 2000);
+          setAlertMessage("")
+          navigate("/Dashboard")
+        }, 2000)
       } else {
-        throw new Error("No teacher record found. Please contact support.");
+        throw new Error("No teacher record found. Please contact support.")
       }
     } catch (err) {
-      setAlertMessage(err.message || "Incorrect Login ID and/or password.");
-      setAlertType("error");
-      setTimeout(() => setAlertMessage(""), 2000);
+      setAlertMessage("Incorrect Login ID and/or password.")
+      setAlertType("error")
+      setTimeout(() => setAlertMessage(""), 2000)
     }
   };
   

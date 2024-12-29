@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate
 import { ThemeContext } from "../App"; // Import ThemeContext
 import { FaUser, FaEnvelope, FaLock } from "react-icons/fa";
 import { registerUser } from "../services/authHandler"; 
-import { addTeacher } from "../services/teacherHandler"; 
+import { addTeacher,getAllTeachers } from "../services/teacherHandler"; 
 
 
 
@@ -15,8 +15,10 @@ const RegisterPage = () => {
     password: "",
     name: "",
   });
-  const [error, setError] = useState("");
+  const [error, setError] = useState(""); // eslint-disable-line no-unused-vars
   const navigate = useNavigate(); // Initialize navigate
+  const [alertMessage, setAlertMessage] = useState("");
+  const [alertType, setAlertType] = useState("");
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,23 +26,47 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     try {
+      const teachers = await getAllTeachers();
+      const emailExists = teachers.some((teacher) => teacher.email === formData.email);
+  
+      if (emailExists) {
+        setAlertMessage("This email is already registered. Please use a different email.");
+        setAlertType("error");
+  
+        // Remove alert after 2 seconds
+        setTimeout(() => {
+          setAlertMessage("");
+        }, 2000);
+  
+        return;
+      }
+  
       const user = await registerUser(formData.email, formData.password, formData.name);
-
-      // Save teacher details to Firestore
       await addTeacher(user.uid, {
         name: formData.name,
         email: formData.email,
       });
-
-      alert(`Registration successful! Welcome, ${user.email}.`);
-      setFormData({ email: "", password: "", name: "" });
-      navigate("/login");
+  
+      setAlertMessage(`Registration successful! Welcome, ${user.email}.`);
+      setAlertType("success");
+  
+      setTimeout(() => {
+        setAlertMessage("");
+        navigate("/login");
+      }, 2000);
     } catch (err) {
-      setError(err.message || "An unexpected error occurred.");
+      setAlertMessage(err.message || "An unexpected error occurred.");
+      setAlertType("error");
+  
+      // Remove alert after 2 seconds
+      setTimeout(() => {
+        setAlertMessage("");
+      }, 2000);
     }
   };
+  
   const styles = {
     pageContainer: {
       display: "flex",
@@ -70,6 +96,7 @@ const RegisterPage = () => {
   },
     },
     container: {
+      position: "relative",
       padding: "40px",
       backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
       color: theme === "light" ? "#333" : "#f9f9f9",
@@ -78,6 +105,7 @@ const RegisterPage = () => {
         ? "0 4px 20px rgba(0, 0, 0, 0.1)"
         : "0 4px 20px rgba(0, 0, 0, 0.4)",
       fontFamily: "'Roboto', sans-serif",
+      
       
       "@media (maxWidth: 768px)": {
     width: "90%", // Reduce width for smaller screens
@@ -157,6 +185,21 @@ const RegisterPage = () => {
       width: "100%",
       marginBottom: "15px",
     },
+    alertMessage: {
+      position: "absolute", // Positioned relative to the parent container
+      top: "20px", // Adjusted to 20px above the register container
+      left: "50%",
+      transform: "translateX(-50%)",
+      padding: "15px 20px",
+      borderRadius: "8px",
+      backgroundColor: alertType === "success" ? "#4CAF50" : "#F44336",
+      color: "#fff",
+      fontSize: "16px",
+      fontWeight: "bold",
+      boxShadow: "0 4px 8px rgba(0, 0, 0, 0.2)",
+      zIndex: 1000,
+      textAlign: "center",
+    }
   };
 
 
@@ -168,6 +211,13 @@ const RegisterPage = () => {
       <div style={styles.sidebarSpacing}></div>
       <div style={styles.mainContent}>
       <div style={styles.container}>
+      {alertMessage && (
+      <div
+        style={styles.alertMessage}
+      >
+        {alertMessage}
+      </div>
+    )}
 <h2 style={styles.header}>Sign Up</h2>
 {error && <p style={styles.error}>{error}</p>}
 <form onSubmit={handleSubmit} style={styles.form}>
