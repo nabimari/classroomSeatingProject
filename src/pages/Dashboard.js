@@ -23,7 +23,7 @@ const Dashboard = () => {
     },
     mainContent: {
       position: "absolute",
-      top: "10px", // Matches the header height
+      top: "10px", // Matches the header height...
       left: "300px", // Matches the sidebar width
       width: "calc(100% - 300px)", // Subtracts sidebar width from the total width
       height: "calc(100vh - 80px - 60px)", // Subtracts header and footer heights from total height
