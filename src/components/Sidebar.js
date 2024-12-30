@@ -354,12 +354,12 @@ const dynamicPaths = {
         {/* Logo Container */}
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
           <img
-            src="/VS-Logo.jpg" 
+            src="/Logo3.jpg" 
             alt="Logo"
             style={{
-              width: "170px",
-              height: "170px",
-              objectFit: "contain",
+              width: "250px",
+              height: "250px",
+              objectFit: "cover",
               borderRadius: "50%",
               marginBottom: "-20px",
               
