@@ -71,12 +71,23 @@ const RegisterPage = () => {
     pageContainer: {
       display: "flex",
       flexDirection: "row",
-      backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
-      color: theme === "light" ? "#333" : "#f9f9f9",
       padding: "20px",
       marginRight:"150px",
       boxSizing: "border-box",
       flexWrap: "wrap",
+      minHeight: "100vh", // Ensure content fits the page
+    position: "relative",
+    },
+    backgroundImageContainer: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw", // Full viewport width
+      height: "100vh", // Full viewport height
+      backgroundImage: theme === "light" ?  "url('/light.jpg')" :"url('/dark.jpg')" , // Path to the image specific for this page
+      backgroundSize: "cover", // Ensure it covers the container
+      backgroundPosition: "center", // Center the image
+      backgroundRepeat: "no-repeat", // Prevent tiling
     },
     sidebarSpacing: {
       width: "300px", // Adjust according to your sidebar width
@@ -91,7 +102,7 @@ const RegisterPage = () => {
       justifyContent: "center",
       marginTop: "300px",
       "@media (idth: 768px)": {
-    marginLeft: "0", // Remove left margin for smaller screens
+    marginLeft: "0", 
     marginTop: "50px", 
   },
     },
@@ -208,6 +219,7 @@ const RegisterPage = () => {
 
 
   return (
+    <div style={styles.backgroundImageContainer}>
     <div style={styles.pageContainer}>
       <div style={styles.sidebarSpacing}></div>
       <div style={styles.mainContent}>
@@ -277,6 +289,7 @@ Create Account
 
 
 </form>
+</div>
 </div>
 </div>
 </div>
