@@ -271,7 +271,7 @@ const GenerateSeating = ({ teacherId }) => {
  justifyContent: "center",
  alignItems: "center",
  padding: "10px",
- borderRadius: "10px",
+ borderRadius: "20px",
  border: theme === "light" ? "1px solid #ddd" : "1px solid #555",
  backgroundColor: theme === "light" ? "#e3f2fd" : "#37474f",
  color: theme === "light" ? "#333" : "#f9f9f9",
@@ -336,22 +336,31 @@ const GenerateSeating = ({ teacherId }) => {
  {loading ? (
  <p>Loading seating arrangement...</p>
 ) : seatingMatrix.length > 0 ? (
+ 
  <div style={Styles.matrixContainerStyle}>
- <h3>Seating Arrangement</h3>
- <table>
- <tbody>
- {seatingMatrix.map((row, rowIndex) => (
- <tr key={rowIndex}>
- {row.map((studentName, colIndex) => (
- <td key={colIndex} style={{ textAlign: "center", padding: "10px" }}>
- <div style={Styles.seatStyle}>{studentName}</div>
- </td>
- ))}
- </tr>
- ))}
- </tbody>
- </table>
+  <h3 style={{ marginBottom: "20px" }}>Seating Arrangement</h3>
+  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+    <tbody>
+      {seatingMatrix.map((row, rowIndex) => (
+        <tr key={rowIndex}>
+          {row.map((studentName, colIndex) => (
+            <td
+              key={colIndex}
+              style={{
+                textAlign: "center",
+                padding: "10px",
+                verticalAlign: "middle",
+              }}
+            >
+              <div style={Styles.seatStyle}>{studentName}</div>
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
 </div>
+
 
 ) : (
  <p>No seating arrangement generated yet.</p>
