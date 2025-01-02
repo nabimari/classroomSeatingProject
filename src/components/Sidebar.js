@@ -82,7 +82,7 @@ const dynamicPaths = {
       width: "270px",
       height: "100vh",
       zIndex: 1000, 
-      backgroundColor: theme === "light" ? "#f4f4f4" : "#121212",
+      backgroundColor: theme === "light" ? "#f4f4f4" : "#1E1E1E",
       color: theme === "light" ? "#333" : "#f9f9f9",
       boxShadow: "2px 0 8px rgba(0, 0, 0, 0.1)",
       borderRight: "1px solid rgba(0, 0, 0, 0.1)",

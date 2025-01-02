@@ -274,7 +274,7 @@ console.log("Seating Arrangement:", seating);
  },
  matrixContainerStyle: {
  marginTop: "20px",
- backgroundColor: theme === "light" ? "#ffffff" : "#1E1E1E",
+ backgroundColor: theme === "light" ? "#f9f7f7" : "#1E1E1E",
  padding: "20px",
  borderRadius: "12px",
  boxShadow: theme === "light"
@@ -316,15 +316,15 @@ console.log("Seating Arrangement:", seating);
 },
 headerCellStyle: {
   fontWeight: "bold",
-  border: theme === "light" ?"5px solid white" :"5px solid black",
+  border: "5px solid black",
   padding: "15px",
-  backgroundColor: theme === "light" ? "#000" : "#fff",
+  backgroundColor: theme === "light" ? "#212020" : "#fff",
   color: theme === "light" ? "#fff" : "#000",
 },
 cellStyle: {
   textAlign: "center",
   padding: "15px",
-  border: theme==="light" ?"5px solid white": "5px solid black" , // Default border for all sides
+  border: "5px solid black" , // Default border for all sides
   borderRight: "none", // Handled conditionally in the render logic
   backgroundColor: theme === "light" ? "#7e93a2" : "#0d2b39",
   color: theme === "light" ? "#000" : "#f9f9f9",
@@ -416,8 +416,8 @@ emptyCellStyle: {
             key={colIndex}
             style={{
               ...Styles.cellStyle,
-              borderLeft: isLeftBorder ?theme === "light" ?"5px solid white" :"5px solid black" : "none",
-              borderRight: isRightBorder ? theme === "light" ?"5px solid white" :"5px solid black" : "none",
+              borderLeft: isLeftBorder ?"5px solid black" : "none",
+              borderRight: isRightBorder ? "5px solid black" : "none",
             }}
           >
             {studentName || ""}
