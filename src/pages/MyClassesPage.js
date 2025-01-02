@@ -44,6 +44,7 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
 
   const styles = {
     pageLayout: {
+      
       display: "flex",
       flexDirection: "row",
       minHeight: "100vh",
@@ -57,6 +58,7 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
       flexShrink: 0,
     },
     pageContainer: {
+      zIndex: 0,
       flex: 1,
       marginBottom:"300px",
       display: "flex",

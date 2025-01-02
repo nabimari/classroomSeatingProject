@@ -65,6 +65,7 @@ if (
       flexShrink: 0, // Prevent sidebar from shrinking
     },
     contentArea: {
+      zIndex:0,
       flex: 1, // Allow the content area to take the remaining space
       padding: "20px",
     },

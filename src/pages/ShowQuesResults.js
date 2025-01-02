@@ -148,10 +148,11 @@ const ShowQuesResults = () => {
       flexShrink: 0,
     },
     contentArea: {
+      zIndex:0,
       flex: 1,
       marginLeft: "20px",
       padding: "20px",
-      backgroundColor: theme === "light" ? "#ffffff" : "#1e1e1e",
+      background:"transparent",
       borderRadius: "8px",
       boxShadow: theme === "light"
         ? "0 8px 16px rgba(0, 0, 0, 0.2)"

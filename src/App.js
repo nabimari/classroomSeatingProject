@@ -13,6 +13,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import Sidebar from "./components/Sidebar"; // Modularized Header
 import ViewStudentsPage from "./pages/ViewStudentsPage";
 import Analytics from "./pages/Analytics";
+import Layout from './components/Layout';
 
 // Create a Theme Context
 export const ThemeContext = createContext();
@@ -88,6 +89,7 @@ const App = () => {
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme }}>
+      <Layout>
       <div
         style={{
           backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
@@ -167,6 +169,7 @@ const App = () => {
           </Routes>
         </Router>
       </div>
+      </Layout>
     </ThemeContext.Provider>
   );
 };

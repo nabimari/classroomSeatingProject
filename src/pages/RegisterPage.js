@@ -75,20 +75,10 @@ const RegisterPage = () => {
       marginRight:"150px",
       boxSizing: "border-box",
       flexWrap: "wrap",
-      minHeight: "100vh", // Ensure content fits the page
+      maxHeight: "100vh", 
     position: "relative",
     },
-    backgroundImageContainer: {
-      position: "fixed",
-      top: 0,
-      left: 0,
-      width: "100vw", // Full viewport width
-      height: "100vh", // Full viewport height
-      backgroundImage: theme === "light" ?  "url('/light.jpg')" :"url('/dark.jpg')" , // Path to the image specific for this page
-      backgroundSize: "cover", // Ensure it covers the container
-      backgroundPosition: "center", // Center the image
-      backgroundRepeat: "no-repeat", // Prevent tiling
-    },
+    
     sidebarSpacing: {
       width: "300px", // Adjust according to your sidebar width
       flexShrink: 0,
@@ -116,8 +106,6 @@ const RegisterPage = () => {
         ? "0 4px 20px rgba(0, 0, 0, 0.1)"
         : "0 4px 20px rgba(0, 0, 0, 0.4)",
       fontFamily: "'Roboto', sans-serif",
-      
-      
       
       "@media (maxWidth: 768px)": {
     width: "90%", // Reduce width for smaller screens
@@ -219,7 +207,7 @@ const RegisterPage = () => {
 
 
   return (
-    <div style={styles.backgroundImageContainer}>
+    
     <div style={styles.pageContainer}>
       <div style={styles.sidebarSpacing}></div>
       <div style={styles.mainContent}>
@@ -292,7 +280,7 @@ Create Account
 </div>
 </div>
 </div>
-</div>
+
   );
 };
 

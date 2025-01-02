@@ -3,6 +3,7 @@ import { getClassesByTeacherID } from "../services/classHandler";
 import { getStudentsByClassID, getQuestionnaireResponses } from "../services/studentHandler";
 import { saveGeneratedSeating, fetchExistingSeating } from "../services/seatingHandler";
 import { ThemeContext } from "../App";
+import ClassroomCSP from '../services/CSP';
 
 const GenerateSeating = ({ teacherId }) => {
  const [classes, setClasses] = useState([]);
@@ -12,6 +13,27 @@ const GenerateSeating = ({ teacherId }) => {
  const [seatingMatrix, setSeatingMatrix] = useState([]);
  const [loading, setLoading] = useState(false);
  const { theme } = useContext(ThemeContext);
+ const studentsArr = [
+  { id: '1735725823787', name: 'Mia Taylor', score: 3.0, specialNeeds: false, avoid: ['1735725776681', '1735725809881'] },
+  { id: '1735725776681', name: 'William Jones', score: 3.0, specialNeeds: false, avoid: ['1735725823787'] },
+  { id: '1735725753960', name: 'Chloe Brown', score: 3.0, specialNeeds: true, avoid: [] },
+  { id: '1735725809881', name: 'Liam Moore', score: 4.0, specialNeeds: false, avoid: ['1735725823787'] },
+  { id: '1735725655309', name: 'Sarah Davis', score: 3.0, specialNeeds: false, avoid: [] },
+  { id: '1735725798421', name: 'Isabella Martinez', score: 2.0, specialNeeds: true, avoid: ['1735725835760'] },
+  { id: '1735725835760', name: 'Ethan White', score: 5.0, specialNeeds: false, avoid: [] },
+  { id: '1735725904827', name: 'Sophia Johnson', score: 3.0, specialNeeds: false, avoid: [] },
+  { id: '1735725704655', name: 'Michael Lee', score: 3.0, specialNeeds: false, avoid: [] },
+  { id: '1735725881421', name: 'Olivia Garcia', score: 3.0, specialNeeds: true, avoid: ['1735725896293'] },
+  { id: '1735725918059', name: 'Noah Martinez', score: 3.0, specialNeeds: false, avoid: ['1735725881421'] },
+  { id: '1735725609177', name: 'John Smith', score: 4.0, specialNeeds: false, avoid: [] },
+  { id: '1735725621980', name: 'Emily Johnson', score: 3.0, specialNeeds: false, avoid: [] },
+  { id: '1735725764408', name: 'Benjamin Brown', score: 5.0, specialNeeds: false, avoid: [] },
+  { id: '1735725686661', name: 'David Miller', score: 5.0, specialNeeds: false, avoid: [] },
+  { id: '1735725940077', name: 'Ella Davis', score: 5.0, specialNeeds: false, avoid: [] },
+  { id: '1735725855198', name: 'Ava Clark', score: 3.0, specialNeeds: true, avoid: ['1735725609177'] },
+  { id: '1735725640085', name: 'Lily Martinez', score: 3.0, specialNeeds: true, avoid: [] },
+  { id: '1735725896293', name: 'James Garcia', score: 5.0, specialNeeds: false, avoid: [] }
+];
 
  // Fetch teacher-specific classes
  useEffect(() => {
@@ -84,10 +106,10 @@ const GenerateSeating = ({ teacherId }) => {
  responses["Academic Performance"] === "Above average" ? 4 :
  responses["Academic Performance"] === "Average" ? 3 :
  responses["Academic Performance"] === "Below average" ? 2 : 1,
- behavior: responses["Behavioral and Social Traits"] === "Exemplary behavior" ? 5 :
- responses["Behavioral and Social Traits"] === "Positive influence" ? 4 :
+ behavior: responses["Behavioral and Social Traits"] === "Exemplary behavior" ? 1 :
+ responses["Behavioral and Social Traits"] === "Positive influence" ? 2 :
  responses["Behavioral and Social Traits"] === "Neutral" ? 3 :
- responses["Behavioral and Social Traits"] === "Occasionally disruptive" ? 2 : 1,
+ responses["Behavioral and Social Traits"] === "Occasionally disruptive" ? 4 : 5,
  specialNeeds: responses["Special Needs"] === "Yes" ? 5 : 1,
  };
 
@@ -112,16 +134,9 @@ const GenerateSeating = ({ teacherId }) => {
  };
 
 
- const generateSeatingArrangement = (students, rowSize = 8) => {
- const matrix = [];
- for (let i = 0; i < students.length; i += rowSize) {
- matrix.push(students.slice(i, i + rowSize).map((student) => student.name)); // Extract only names
- }
+ const generateSeatingArrangement = (students) => {
+  return students.map(row => row.map(student => student ? student.name : null));
 
- // Log only the names in the matrix
- console.log("Generated Seating Matrix (Names Only):", JSON.stringify(matrix, null, 2));
-
- return matrix;
  };
 
 
@@ -137,9 +152,12 @@ const GenerateSeating = ({ teacherId }) => {
  const presentStudents = students.filter((student) => attendance[student.id]);
  const studentData = await fetchStudentDataWithResponses(presentStudents);
 
- const scoredStudents = analyzeStudentScores(studentData);
- const prioritizedStudents = prioritizeStudents(scoredStudents);
- const seatingMatrix = generateSeatingArrangement(prioritizedStudents);
+//  const scoredStudents = analyzeStudentScores(studentData);
+ 
+const classroom = new ClassroomCSP(5, 8, studentsArr);
+const seating = classroom.solve();
+console.log("Seating Arrangement:", seating);
+ const seatingMatrix = generateSeatingArrangement(seating);
 
  setSeatingMatrix(seatingMatrix);
 
@@ -157,6 +175,7 @@ const GenerateSeating = ({ teacherId }) => {
 
  const Styles = {
  pageContainer: {
+  
  display: "flex",
  flexDirection: "row",
  minHeight: "95vh",
@@ -173,6 +192,7 @@ const GenerateSeating = ({ teacherId }) => {
  },
  },
  mainContent: {
+  
  flex: 1,
  padding: "20px",
  display: "flex",
@@ -190,6 +210,7 @@ const GenerateSeating = ({ teacherId }) => {
  },
  },
  containerStyle: {
+  zIndex: 0,
  padding: "20px",
  maxWidth: "800px",
  width: "100%",
@@ -285,6 +306,38 @@ const GenerateSeating = ({ teacherId }) => {
  minWidth: "80px",
  maxWidth: "150px",
  },
+ tableStyle: {
+  width: "100%",
+  borderCollapse: "separate", // Allows spacing
+  borderSpacing: "10px 15px", // Horizontal and vertical spacing between tables
+  marginTop: "20px",
+  textAlign: "center",
+  
+},
+headerCellStyle: {
+  fontWeight: "bold",
+  border: theme === "light" ?"5px solid white" :"5px solid black",
+  padding: "15px",
+  backgroundColor: theme === "light" ? "#000" : "#fff",
+  color: theme === "light" ? "#fff" : "#000",
+},
+cellStyle: {
+  textAlign: "center",
+  padding: "15px",
+  border: theme==="light" ?"5px solid white": "5px solid black" , // Default border for all sides
+  borderRight: "none", // Handled conditionally in the render logic
+  backgroundColor: theme === "light" ? "#7e93a2" : "#0d2b39",
+  color: theme === "light" ? "#000" : "#f9f9f9",
+  fontWeight: "bold",
+  borderRadius: "0px",
+  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+},
+emptyCellStyle: {
+  backgroundColor: theme === "light" ? "#fff" : "#000",
+  color: theme === "light" ? "#aaa" : "#777",
+  fontStyle: "italic",
+  fontWeight: "normal",
+},
  };
  return (
  <div style={Styles.pageContainer}>
@@ -337,27 +390,44 @@ const GenerateSeating = ({ teacherId }) => {
  <p>Loading seating arrangement...</p>
 ) : seatingMatrix.length > 0 ? (
  
- <div style={Styles.matrixContainerStyle}>
+  <div style={Styles.matrixContainerStyle}>
   <h3 style={{ marginBottom: "20px" }}>Seating Arrangement</h3>
-  <table style={{ width: "100%", borderCollapse: "collapse" }}>
+  <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "center" }}>
+    <thead>
+      <tr>
+        <th></th>
+        {Array.from({ length: 4 }, (_, index) => (
+          <th key={index} colSpan="2" style={Styles.headerCellStyle}>
+            Table {index + 1}
+          </th>
+        ))}
+      </tr>
+    </thead>
     <tbody>
-      {seatingMatrix.map((row, rowIndex) => (
-        <tr key={rowIndex}>
-          {row.map((studentName, colIndex) => (
-            <td
-              key={colIndex}
-              style={{
-                textAlign: "center",
-                padding: "10px",
-                verticalAlign: "middle",
-              }}
-            >
-              <div style={Styles.seatStyle}>{studentName}</div>
-            </td>
-          ))}
-        </tr>
-      ))}
-    </tbody>
+  {seatingMatrix.map((row, rowIndex) => (
+    <tr key={rowIndex}>
+      <td style={Styles.headerCellStyle}>Row {rowIndex + 1}</td>
+      {row.map((studentName, colIndex) => {
+        // Determine if this cell is at the start or end of a table group
+        const isLeftBorder = colIndex % 2 === 0; // Start of a new group
+        const isRightBorder = (colIndex + 1) % 2 === 0; // End of a group
+        return (
+          <td
+            key={colIndex}
+            style={{
+              ...Styles.cellStyle,
+              borderLeft: isLeftBorder ?theme === "light" ?"5px solid white" :"5px solid black" : "none",
+              borderRight: isRightBorder ? theme === "light" ?"5px solid white" :"5px solid black" : "none",
+            }}
+          >
+            {studentName || ""}
+          </td>
+        );
+      })}
+    </tr>
+  ))}
+</tbody>
+
   </table>
 </div>
 

@@ -120,6 +120,7 @@ const LoginPage = () => {
         color: theme === "light" ? "#333" : "#f9f9f9",
         boxSizing: "border-box",
         flexWrap: "wrap",
+        
       },
       sidebarSpacing: {
         width: "300px",
@@ -137,6 +138,7 @@ const LoginPage = () => {
         boxShadow: theme === "light"
           ? "0 4px 8px rgba(0, 0, 0, 0.1)"
           : "0 4px 8px rgba(0, 0, 0, 0.5)",
+          
       },
       container: {
         padding: "40px",
@@ -282,11 +284,13 @@ const LoginPage = () => {
         marginLeft: "150px",
         padding: "50px",
         width: "93%",
+        
         boxShadow: theme === "light"
           ? "0 -4px 10px rgba(0, 0, 0, 0.1)"
           : "0 -4px 10px rgba(0, 0, 0, 0.4)",
       },
       footerContainer: {
+        
         width: "100%",
         backgroundColor: theme === "light" ? "#333" : "#1E1E1E",
         color: "#fff",
@@ -295,6 +299,7 @@ const LoginPage = () => {
         borderTop: theme === "light" ? "1px solid #ddd" : "1px solid #444",
       },
       footerContent: {
+        
         maxWidth: "1200px",
         margin: "0 auto",
         display: "flex",
@@ -360,6 +365,7 @@ const LoginPage = () => {
         color: "#ffffff",
         textAlign: "center",
         borderTop: "1px solid #ccc",
+        zIndex: 0,
         width: "100%",
         "@media (maxWidth: 768px)": {
     flexDirection: "column", // Stack footer content vertically

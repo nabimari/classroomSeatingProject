@@ -70,6 +70,7 @@ const Dashboard = () => {
       textAlign: "center",
       borderTop: "1px solid #ccc",
       width: "100%",
+      zIndex: 0,
     },
     footerSpacing: {
       width: "300px",

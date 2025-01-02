@@ -161,7 +161,7 @@ const ViewStudentsPage = ({ teacherName  }) => {
   const styles = {
     container: {
       display: "flex",
-      minHeight: "95vh",
+      minHeight: "50vh",
       flexDirection: "row",
       padding: "20px",
       backgroundColor: theme === "light" ? "#f9f9f9" : "#121212",
@@ -178,15 +178,15 @@ const ViewStudentsPage = ({ teacherName  }) => {
       flexShrink: 0,
     },
     mainContent: {
+      zIndex: 0,
       flex: 1,
-      maxWidth: "800px",
+      maxWidth: "700px",
       margin: "0 auto",
       padding: "20px",
-      backgroundColor: theme === "light" ? "#ffffff" : "#1E1E1E",
+      
+      background: "transparent",
       borderRadius: "12px",
-      boxShadow: theme === "light"
-        ? "0 4px 8px rgba(0, 0, 0, 0.1)"
-        : "0 4px 8px rgba(0, 0, 0, 0.5)",
+      
         "@media (maxWidth: 768px)": {
   maxWidth: "100%", // Make it full-width
   margin: "0", // Remove auto margins

@@ -95,10 +95,11 @@ const ShowStudents = () => {
       flexShrink: 0,
     },
     mainContent: {
+      zIndex:0,
       flex: 1,
       marginLeft: "20px", // Adjust spacing from sidebar
       padding: "20px",
-      backgroundColor: theme === "light" ? "#ffffff" : "#1E1E1E",
+      background:"transparent",
       borderRadius: "12px",
       boxShadow: theme === "light"
         ? "0 4px 8px rgba(0, 0, 0, 0.1)"
@@ -202,6 +203,8 @@ const ShowStudents = () => {
       borderBottom: theme === "light" ? "2px solid #E0E0E0" : "2px solid #555",
       textTransform: "uppercase",
       fontSize: "14px",
+      position: "sticky",
+      top: 0,
     },
     td: {
       padding: "12px 18px",
