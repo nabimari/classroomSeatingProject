@@ -1,3 +1,6 @@
+
+
+
 export default class ClassroomCSP {
     constructor(rows, seatsPerRow, students) {
         this.rows = rows; // Number of rows in the classroom

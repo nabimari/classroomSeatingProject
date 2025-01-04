@@ -334,6 +334,35 @@ const Analytics = ({ teacherId }) => {
       flex: "1 1 45%",
       minWidth: "300px",
     },
+    spinnerOverlay: {
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      background:"transparent",
+      
+    },
+    
+    spinner: {
+      width: "80px",
+      height: "80px",
+      border: "8px solid rgba(200, 200, 200, 0.2)", // Light gray border
+      borderTop: "8px solid #007bff", // Blue border for animation
+      borderRadius: "50%",
+      animation: "spin 1s linear infinite",
+    },
+    
+    spinnerText: {
+      marginTop: "20px",
+      fontSize: "18px",
+      fontWeight: "bold",
+      color: theme === "light" ? "#333" : "#f9f9f9",
+    },
   };
 
   return (
@@ -355,7 +384,24 @@ const Analytics = ({ teacherId }) => {
           ))}
         </select>
   
-        {loading && <p>Loading analytics...</p>}
+        {loading && (
+  <div style={styles.spinnerOverlay}>
+    <div style={styles.spinner}></div>
+    <p style={styles.spinnerText}>Loading Analytics</p>
+  </div>
+)}
+            <style>
+          {`
+            @keyframes spin {
+              0% {
+                transform: rotate(0deg);
+              }
+              100% {
+                transform: rotate(360deg);
+              }
+            }
+          `}
+        </style>
         {error && <p style={{ color: "red" }}>{error}</p>}
   
         {analyticsData && (

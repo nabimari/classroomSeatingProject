@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { useNavigate ,useLocation} from "react-router-dom";
-import { logout } from "../services/authHandler"; 
+import { logout,getCurrentUser } from "../services/authHandler"; 
 import { ThemeContext } from "../App";
 import { auth } from "../firebase"
 import {
@@ -18,7 +18,7 @@ const Sidebar = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
-  const currentUser = auth.currentUser;
+  const currentUser = getCurrentUser();
   const teacherName = currentUser?.displayName || "Teacher";
   const [showAlert, setShowAlert] = useState(false);
   const location = useLocation();
@@ -353,18 +353,41 @@ const dynamicPaths = {
       <div style={styles.sidebar}>
         {/* Logo Container */}
         <div style={{ textAlign: "center", marginBottom: "20px" }}>
-          <img
-            src="/Logo3.jpg" 
-            alt="Logo"
-            style={{
-              width: "250px",
-              height: "250px",
-              objectFit: "cover",
-              borderRadius: "50%",
-              marginBottom: "-20px",
-              
-            }}
-          />
+        <img
+          src="/vc logo.png"
+          alt="Logo"
+          className="logoAnimation"
+          style={{
+            width: "250px",
+            height: "250px",
+            objectFit: "cover",
+            borderRadius: "50%",
+            marginBottom: "-20px",
+        }}
+        />
+
+      <style>
+        {`
+        .logoAnimation {
+         animation: fadeAnimation 2s infinite alternate, pulse 3s infinite alternate;
+        }
+
+       @keyframes fadeAnimation {
+         0% {
+            opacity: 0.7; /* Half-transparent */
+          }
+          100% {
+           opacity: 1; /* Fully visible */
+         }
+       }
+          @keyframes pulse: {
+          "0%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.1)" },
+          "100%": { transform: "scale(1)" },
+        },
+      `}
+      </style>
+
         </div>
   
         {/* Sidebar Title */}
