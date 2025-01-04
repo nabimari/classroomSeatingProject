@@ -12,7 +12,7 @@ const Layout = ({ children }) => {
       width: "100vw",
       height: "100vh",
       backgroundImage:
-        theme === "light" ? "url('/White_Background.jpg')" : "url('/Black_Background.jpg')",
+        theme === "light" ? "url('/White_Background.png')" : "url('/Black_Background.jpg')",
       backgroundSize: "cover",
       backgroundPosition: "center",
       backgroundRepeat: "no-repeat",
