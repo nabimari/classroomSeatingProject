@@ -5,8 +5,11 @@ import { getClassesByTeacherID, addNewClass } from "../services/classHandler";
 
 const MyClassesPage = ({ teacherId, teacherName }) => {
   const [classes, setClasses] = useState([]);
-  const [newClassName, setNewClassName] = useState("");
   const { theme } = useContext(ThemeContext); // Access theme
+  const gradeNumbers = Array.from({ length: 12 }, (_, i) => i + 1); 
+const subclassOptions = ["A", "B", "C", "D"];
+const [selectedGrade, setSelectedGrade] = useState("");
+const [selectedSubclass, setSelectedSubclass] = useState("");
 
   const navigate = useNavigate();
 
@@ -26,20 +29,24 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
 
   // Add a new class
   const handleAddClass = async () => {
-    if (!newClassName.trim()) {
-      alert("Please provide a valid class name.");
+    if (!selectedGrade || !selectedSubclass) {
+      alert("Please select both grade and subclass.");
       return;
     }
+  
+    const fullClassName = `Grade ${selectedGrade}${selectedSubclass}`;
     try {
-      const newClass = await addNewClass(newClassName, teacherId, teacherName);
+      const newClass = await addNewClass(fullClassName, teacherId, teacherName);
       setClasses((prev) => [...prev, newClass]);
       alert("Class added successfully!");
-      setNewClassName("");
+      setSelectedGrade("");
+      setSelectedSubclass("");
     } catch (err) {
       console.error("Error adding class:", err.message);
       alert(`Error: ${err.message}`);
     }
   };
+  
 
 
   const styles = {
@@ -216,13 +223,38 @@ const MyClassesPage = ({ teacherId, teacherName }) => {
         <div style={styles.addClassContainer}>
           <h3 style={styles.addClassHeader}>Add a New Class</h3>
           <div style={styles.addClassForm}>
-            <input
-              type="text"
-              placeholder="Class Name"
-              value={newClassName}
-              onChange={(e) => setNewClassName(e.target.value)}
-              style={styles.inputField}
-            />
+          <div style={{ display: "flex", gap: "10px" }}>
+  <select
+    value={selectedGrade} // Use a separate state for grade
+    onChange={(e) => setSelectedGrade(e.target.value)}
+    style={styles.inputField}
+  >
+    <option value="" disabled>
+      Select Grade
+    </option>
+    {gradeNumbers.map((grade) => (
+      <option key={grade} value={grade}>
+        Grade {grade}
+      </option>
+    ))}
+  </select>
+
+  <select
+    value={selectedSubclass} // Use a separate state for subclass
+    onChange={(e) => setSelectedSubclass(e.target.value)}
+    style={styles.inputField}
+  >
+    <option value="" disabled>
+      Select Subclass
+    </option>
+    {subclassOptions.map((subclass) => (
+      <option key={subclass} value={subclass}>
+        {subclass}
+      </option>
+    ))}
+  </select>
+</div>
+
             <button
               onClick={handleAddClass}
               style={styles.addClassButton}

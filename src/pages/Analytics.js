@@ -121,23 +121,35 @@ const Analytics = ({ teacherId }) => {
     let totalValue = 0;
     let totalCount = 0;
   
-    Object.keys(academicLevelDistribution).forEach((level) => {
-      const count = academicLevelDistribution[level] || 0; // Ensure no undefined values
+    // Accumulate total value and count
+    Object.keys(levelMapping).forEach((level) => {
+      const count = academicLevelDistribution[level] || 0; // Default to 0 if level is missing
       totalValue += levelMapping[level] * count;
       totalCount += count;
     });
   
-    const averageValue = totalValue / totalCount || 0; // Calculate the average value
+    if (totalCount === 0) {
+      return "No Data"; // Handle empty distributions
+    }
   
-    // Map the average back to the nearest academic level
+    const averageValue = totalValue / totalCount;
+  
+    // Correct rounding logic: floor for x.1-x.49, ceil for x.50-x.99
+    const roundedAverage =
+      averageValue - Math.floor(averageValue) < 0.5
+        ? Math.floor(averageValue)
+        : Math.ceil(averageValue);
+  
+    // Map back to academic levels
     const reversedMapping = Object.entries(levelMapping).reduce(
       (acc, [key, value]) => ({ ...acc, [value]: key }),
       {}
     );
   
-    // Return the nearest academic level
-    return reversedMapping[Math.round(averageValue)] || "No Data";
+    return reversedMapping[roundedAverage] || "No Data";
   };
+  
+  
   
   // Fetch the teacher's classes
   useEffect(() => {
@@ -354,11 +366,11 @@ const Analytics = ({ teacherId }) => {
             <p
              style={{
                color: {
-                  "Needs significant support": "#f44336", // Red for worst
-                  "Below average": "#ff9800", // Orange
-                  "Average": "#2196f3", // Blue
+                  "Needs significant support": "#b71c1c", // Red for worst
+                  "Below average": "#f44336", // Orange
+                  "Average": "#ff9800", // Blue
                   "Above average": "#4caf50", // Green
-                  "Exceptional": "#03a9f4", // Light blue for best
+                  "Exceptional": "limegreen", // Light blue for best
                  }[calculateAverageAcademicLevel(analyticsData.academicLevelDistribution)],
                 fontSize: 25,
                 }}

@@ -19,6 +19,12 @@ const RegisterPage = () => {
   const navigate = useNavigate(); // Initialize navigate
   const [alertMessage, setAlertMessage] = useState("");
   const [alertType, setAlertType] = useState("");
+  const allowedDomains = ["gmail.com", "walla.com", "yahoo.com", "outlook.com", "hotmail.com", "icloud.com"];
+
+const isEmailDomainValid = (email) => {
+  const domain = email.split("@")[1];
+  return allowedDomains.includes(domain);
+};
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -26,6 +32,13 @@ const RegisterPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
+    if (!isEmailDomainValid(formData.email)) {
+      setAlertMessage("Invalid email domain. Please use a valid email.");
+      setAlertType("error");
+      setTimeout(() => setAlertMessage(""), 3000);
+      return;
+    }
   
     try {
       const teachers = await getAllTeachers();
@@ -35,11 +48,7 @@ const RegisterPage = () => {
         setAlertMessage("This email is already registered. Please use a different email.");
         setAlertType("error");
   
-        // Remove alert after 2 seconds
-        setTimeout(() => {
-          setAlertMessage("");
-        }, 2000);
-  
+        setTimeout(() => setAlertMessage(""), 2000);
         return;
       }
   
@@ -60,12 +69,10 @@ const RegisterPage = () => {
       setAlertMessage(err.message || "An unexpected error occurred.");
       setAlertType("error");
   
-      // Remove alert after 2 seconds
-      setTimeout(() => {
-        setAlertMessage("");
-      }, 2000);
+      setTimeout(() => setAlertMessage(""), 2000);
     }
   };
+  
   
   const styles = {
     pageContainer: {
@@ -234,7 +241,7 @@ const RegisterPage = () => {
     style={styles.input}
   />
   </div>
-  <div style={styles.inputWrapper}>
+  <div style={{ ...styles.inputWrapper, position: "relative" }}>
   <FaEnvelope style={styles.inputIcon} />
   <input
     type="email"
@@ -243,9 +250,29 @@ const RegisterPage = () => {
     value={formData.email}
     onChange={handleChange}
     required
-    style={styles.input}
+    style={{
+      ...styles.input,
+      borderColor:
+        formData.email && !isEmailDomainValid(formData.email) ? "red" : "",
+    }}
   />
-  </div>
+  {formData.email && !isEmailDomainValid(formData.email) && (
+    <p
+      style={{
+        color: theme === "light"?"red":"#fe2b2b",
+        fontSize: "12px",
+        marginLeft: "5px",
+        position: "absolute",
+        top: "90%", // Position it below the input field
+        left: 0,
+      }}
+    >
+      Please use a valid email domain (Gmail, ,Yahoo, etc..).
+    </p>
+  )}
+</div>
+
+
   <div style={styles.inputWrapper}>
    <FaLock style={styles.inputIcon} />
   <input
