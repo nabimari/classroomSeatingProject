@@ -13,27 +13,11 @@ const GenerateSeating = ({ teacherId }) => {
  const [seatingMatrix, setSeatingMatrix] = useState([]);
  const [loading, setLoading] = useState(false);
  const { theme } = useContext(ThemeContext);
- const studentsArr = [
-  { id: '1735725823787', name: 'Mia Taylor', score: 3.0, specialNeeds: false, avoid: ['1735725776681', '1735725809881'] },
-  { id: '1735725776681', name: 'William Jones', score: 3.0, specialNeeds: false, avoid: ['1735725823787'] },
-  { id: '1735725753960', name: 'Chloe Brown', score: 3.0, specialNeeds: true, avoid: [] },
-  { id: '1735725809881', name: 'Liam Moore', score: 4.0, specialNeeds: false, avoid: ['1735725823787'] },
-  { id: '1735725655309', name: 'Sarah Davis', score: 3.0, specialNeeds: false, avoid: [] },
-  { id: '1735725798421', name: 'Isabella Martinez', score: 2.0, specialNeeds: true, avoid: ['1735725835760'] },
-  { id: '1735725835760', name: 'Ethan White', score: 5.0, specialNeeds: false, avoid: [] },
-  { id: '1735725904827', name: 'Sophia Johnson', score: 3.0, specialNeeds: false, avoid: [] },
-  { id: '1735725704655', name: 'Michael Lee', score: 3.0, specialNeeds: false, avoid: [] },
-  { id: '1735725881421', name: 'Olivia Garcia', score: 3.0, specialNeeds: true, avoid: ['1735725896293'] },
-  { id: '1735725918059', name: 'Noah Martinez', score: 3.0, specialNeeds: false, avoid: ['1735725881421'] },
-  { id: '1735725609177', name: 'John Smith', score: 4.0, specialNeeds: false, avoid: [] },
-  { id: '1735725621980', name: 'Emily Johnson', score: 3.0, specialNeeds: false, avoid: [] },
-  { id: '1735725764408', name: 'Benjamin Brown', score: 5.0, specialNeeds: false, avoid: [] },
-  { id: '1735725686661', name: 'David Miller', score: 5.0, specialNeeds: false, avoid: [] },
-  { id: '1735725940077', name: 'Ella Davis', score: 5.0, specialNeeds: false, avoid: [] },
-  { id: '1735725855198', name: 'Ava Clark', score: 3.0, specialNeeds: true, avoid: ['1735725609177'] },
-  { id: '1735725640085', name: 'Lily Martinez', score: 3.0, specialNeeds: true, avoid: [] },
-  { id: '1735725896293', name: 'James Garcia', score: 5.0, specialNeeds: false, avoid: [] }
-];
+ const [satisfaction, setSatisfaction] = useState(null);
+ const [feedbackText, setFeedbackText] = useState('');
+
+ 
+
 
  // Fetch teacher-specific classes
  useEffect(() => {
@@ -97,41 +81,13 @@ const GenerateSeating = ({ teacherId }) => {
  );
  };
 
- //most important
- const analyzeStudentScores = (students) => {
- return students.map((student) => {
- const responses = student.responses || {};
- const scores = {
- academicPerformance: responses["Academic Performance"] === "Exceptional" ? 5 :
- responses["Academic Performance"] === "Above average" ? 4 :
- responses["Academic Performance"] === "Average" ? 3 :
- responses["Academic Performance"] === "Below average" ? 2 : 1,
- behavior: responses["Behavioral and Social Traits"] === "Exemplary behavior" ? 1 :
- responses["Behavioral and Social Traits"] === "Positive influence" ? 2 :
- responses["Behavioral and Social Traits"] === "Neutral" ? 3 :
- responses["Behavioral and Social Traits"] === "Occasionally disruptive" ? 4 : 5,
- specialNeeds: responses["Special Needs"] === "Yes" ? 5 : 1,
- };
 
- const totalWeight = scores.academicPerformance + scores.behavior + scores.specialNeeds;
- return { ...student, totalWeight };
- });
- };
-
- const prioritizeStudents = (students) => {
- // Filter and sort special needs students by totalWeight
- const specialNeeds = students
- .filter((s) => s.responses?.["Special Needs"] === "Yes")
- .sort((a, b) => b.totalWeight - a.totalWeight);
-
- // Filter and sort other students by totalWeight
- const others = students
- .filter((s) => s.responses?.["Special Needs"] !== "Yes")
- .sort((a, b) => b.totalWeight - a.totalWeight);
-
- // Combine the two groups
- return [...specialNeeds, ...others];
- };
+ const handleRegenerate = () => {
+  
+  console.log('Feedback:', feedbackText);
+  handleGenerate(feedbackText);
+  // Process feedback here
+    };
 
 
  const generateSeatingArrangement = (students) => {
@@ -140,7 +96,7 @@ const GenerateSeating = ({ teacherId }) => {
  };
 
 
- const handleGenerate = async () => {
+ const handleGenerate = async (feedback="") => {
  if (!selectedClass) {
  alert("Please select a class before generating the seating arrangement.");
  return;
@@ -151,11 +107,12 @@ const GenerateSeating = ({ teacherId }) => {
  try {
  const presentStudents = students.filter((student) => attendance[student.id]);
  const studentData = await fetchStudentDataWithResponses(presentStudents);
+ console.log(studentData);
 
 //  const scoredStudents = analyzeStudentScores(studentData);
  
-const classroom = new ClassroomCSP(5, 8, studentsArr);
-const seating = classroom.solve();
+const classroom = new ClassroomCSP(5, 8, studentData);
+const seating = await classroom.solve(feedback);
 console.log("Seating Arrangement:", seating);
  const seatingMatrix = generateSeatingArrangement(seating);
 
@@ -166,7 +123,7 @@ console.log("Seating Arrangement:", seating);
 
 
  } catch (error) {
- console.error("Error generating seating arrangement:", error.message);
+ console.error("Error generating seating arrangement:", error);
  alert("Failed to generate seating arrangement. Please try again.");
  } finally {
  setLoading(false);
@@ -264,7 +221,7 @@ console.log("Seating Arrangement:", seating);
  },
  buttonStyle: {
  padding: "10px 20px",
- backgroundColor: "#4CAF50",
+ backgroundColor: "green",
  color: "#fff",
  border: "none",
  borderRadius: "8px",
@@ -338,6 +295,133 @@ emptyCellStyle: {
   fontStyle: "italic",
   fontWeight: "normal",
 },
+feedbackContainer: {
+  padding: "24px",
+  backgroundColor: "white",
+  borderRadius: "8px",
+  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+  maxWidth: "672px",
+  margin: "0 auto"
+},
+
+/* Title styles */
+feedbackTitle: {
+  fontSize: "18px",
+  fontWeight: "600",
+  marginBottom: "16px",
+  color: "#374151"
+},
+
+/* Radio group styles */
+radioGroup: {
+  display: "flex",
+  gap: "24px",
+  marginBottom: "24px"
+},
+
+radioOption: {
+  display: "flex",
+  alignItems: "center"
+},
+
+radioInput: {
+  width: "16px",
+  height: "16px",
+  marginRight: "8px",
+  cursor: "pointer"
+},
+
+radioLabel: {
+  color: "#374151",
+  cursor: "pointer"
+},
+
+feedbackContainer: {
+  padding: "24px",
+  backgroundColor: "white",
+  borderRadius: "8px",
+  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
+  maxWidth: "672px",
+  margin: "0 auto"
+},
+
+/* Title styles */
+feedbackTitle: {
+  fontSize: "18px",
+  fontWeight: "600",
+  marginBottom: "16px",
+  color: "#374151"
+},
+
+/* Radio group styles */
+radioGroup: {
+  display: "flex",
+  gap: "24px",
+  marginBottom: "24px"
+},
+
+radioOption: {
+  display: "flex",
+  alignItems: "center"
+},
+
+radioInput: {
+  width: "16px",
+  height: "16px",
+  marginRight: "8px",
+  cursor: "pointer"
+},
+
+radioLabel: {
+  color: "#374151",
+  cursor: "pointer"
+},
+
+/* Feedback section styles */
+feedbackInputContainer: {
+  display: "flex",
+  flexDirection: "column",
+  gap: "16px"
+},
+
+feedbackPrompt: {
+  color: "#374151",
+  fontWeight: "500"
+},
+
+feedbackTextarea: {
+  width: "90%",
+  height: "25px",
+  padding: "16px",
+  border: "1px solid #D1D5DB",
+  borderRadius: "8px",
+  fontFamily: "inherit",
+  fontSize: "14px",
+  resize: "none"
+},
+
+/* Button styles */
+buttonContainer: {
+  display: "flex",
+  justifyContent: "center",
+  marginTop: "24px"
+},
+
+regenerateButton: {
+  width: "100%",
+  height: "40px",
+  padding: "12px 24px",
+  backgroundColor: "green",
+  color: "white",
+  border: "none",
+  fontSize:"19px",
+  borderRadius: "8px",
+  fontWeight: "500",
+  cursor: "pointer",
+  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)"
+    }
+
+
  };
  return (
  <div style={Styles.pageContainer}>
@@ -387,7 +471,34 @@ emptyCellStyle: {
  </div>
 
  {loading ? (
- <p>Loading seating arrangement...</p>
+    <div
+        style={{
+            display: "flex",
+            flexDirection: "column", // Stack items vertically
+            justifyContent: "center",
+            alignItems: "center",
+            height: "200px",
+        }}
+    >
+        <img
+            src="/Animation.gif"
+            alt="Loading..."
+            style={{
+              marginTop:"700px",
+                width: "250px",
+                height: "250px",
+            }}
+        />
+        <p
+            style={{
+                marginTop: "20px", // Add space between the GIF and text
+                fontSize: "18px",
+                color: theme === "light" ? "#000" : "#fff", 
+            }}
+        >
+            Generating Seating Arrangement...
+        </p>
+    </div>
 ) : seatingMatrix.length > 0 ? (
  
   <div style={Styles.matrixContainerStyle}>
@@ -429,6 +540,56 @@ emptyCellStyle: {
 </tbody>
 
   </table>
+  <div style={Styles.feedbackContainer}>
+    <p style={Styles.feedbackTitle}>
+        Are you satisfied with the results?
+    </p>
+    
+    <div style={Styles.radioGroup}>
+        <div style={Styles.radioOption}>
+            <input 
+                type="radio" 
+                id="satisfied-yes" 
+                name="satisfaction" 
+                value="yes"
+                style={Styles.radioInput}
+                onChange={(e) => setSatisfaction(e.target.value)}
+            />
+            <label style={Styles.radioLabel} htmlFor="satisfied-yes">Yes</label>
+        </div>
+
+        <div style={Styles.radioOption}>
+            <input 
+                type="radio" 
+                id="satisfied-no" 
+                name="satisfaction" 
+                value="no"
+                style={Styles.radioInput}
+                onChange={(e) => setSatisfaction(e.target.value)}
+            />
+            <label style={Styles.radioLabel} htmlFor="satisfied-no">No</label>
+        </div>
+    </div>
+
+    {satisfaction === 'no' && (
+        <div style={Styles.feedbackInputContainer}>
+            <p style={Styles.feedbackPrompt}>Enter feedback here:</p>
+            <textarea 
+                style={Styles.feedbackTextarea}
+                placeholder="Please tell us what could be improved..."
+                value={feedbackText}
+                onChange={(e) => setFeedbackText(e.target.value)}
+            />
+            <div style={Styles.buttonContainer}>
+                <button 
+                    style={Styles.regenerateButton}
+                    onClick={handleRegenerate}>
+                    Regenerate
+                </button>
+            </div>
+        </div>
+    )}
+</div>
 </div>
 
 

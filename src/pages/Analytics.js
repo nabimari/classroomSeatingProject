@@ -385,9 +385,41 @@ const Analytics = ({ teacherId }) => {
         </select>
   
         {loading && (
-  <div style={styles.spinnerOverlay}>
-    <div style={styles.spinner}></div>
-    <p style={styles.spinnerText}>Loading Analytics</p>
+  <div
+    style={{
+      display: "flex",
+      flexDirection: "column", // Stack items vertically
+      justifyContent: "center",
+      alignItems: "center",
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100%",
+      height: "100%",
+      background: "transparent", 
+      zIndex: 1000,
+    }}
+  >
+    <img
+      src="/Animation2.gif" 
+      alt="Loading..."
+      style={{
+        marginLeft:"200px",
+        marginTop:"250px",
+        width: "200px", 
+        height: "200px",
+      }}
+    />
+    <p
+      style={{
+        marginLeft:"200px",
+        marginTop: "20px", // Spacing between GIF and text
+        fontSize: "18px",
+        color: theme === "light" ? "#000" : "#fff",
+      }}
+    >
+      Loading Analytics...
+    </p>
   </div>
 )}
             <style>
