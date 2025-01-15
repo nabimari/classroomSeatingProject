@@ -574,6 +574,16 @@ regenerateButton: {
     {satisfaction === 'no' && (
         <div style={Styles.feedbackInputContainer}>
             <p style={Styles.feedbackPrompt}>Enter feedback here:</p>
+            
+    <p style={{ 
+        color: "green", 
+        fontWeight: "bold", 
+        fontSize: "18px" ,
+        marginTop: "-10px"
+    }}>
+        
+         *More details mean better results*<br />*your input matters!*
+    </p>
             <textarea 
                 style={Styles.feedbackTextarea}
                 placeholder="Please tell us what could be improved..."

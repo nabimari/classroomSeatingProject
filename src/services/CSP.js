@@ -144,7 +144,10 @@ export default class ClassroomCSP {
                                 3. Student Interactions: Consider "avoid" preferences to prevent disruptive combinations
                                 
                                 Previous Feedback to incorporate:
-                                ${previousFeedback}
+                                ${previousFeedback} make sure special needs students are seated always in the first two rows!!
+                                its not necessary to seat all special needs in the same row or in the first seatings, only make sure they sorted based on priority score and if special needs student should be replaced replace him sith the lowest non-special needs student in the first two rows!!
+                                make sure to avoid students if any related information given!
+                                make sure for the most important thing! always check before giving the final matrix if there are no duplicated students**
                                 *** Output only the Matrix ***
                                 Return ONLY a 5x8 matrix of student names in this format:
                                 [
