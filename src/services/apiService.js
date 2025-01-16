@@ -1,6 +1,6 @@
-import { getFirestore, doc, getDoc } from "firebase/firestore";
+import {  doc, getDoc } from "firebase/firestore";
+import { db } from "../firebase";
 
-const db = getFirestore();
 
 // Cache the API key in memory
 let cachedApiKey = null;
