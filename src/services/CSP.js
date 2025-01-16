@@ -1,3 +1,4 @@
+import { fetchApiKey } from "../services/apiService";
 
 export default class ClassroomCSP {
     constructor(rows, seatsPerRow, students) {
@@ -15,10 +16,11 @@ export default class ClassroomCSP {
 
     static async callGPT4Turbo(prompt,feedback="") {
         try {
+            const apiKey = await fetchApiKey(); // Get the cached API key
             const response = await fetch("https://api.openai.com/v1/chat/completions", {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+                    'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -30,6 +32,7 @@ export default class ClassroomCSP {
                             content: `
                                 Analyze the following note:
                                 "${prompt}".
+                                make sure every student appears once only in the matrix!!
                                 Output only the numeric values for:
                                 Behavioral Score, Academic Support Score, Seating Adjustment.
 
@@ -119,10 +122,11 @@ export default class ClassroomCSP {
     
     async RegenerateSeating(studentMatrix, previousFeedback = "") {
         try {
+            const apiKey = await fetchApiKey(); // Get the cached API key
             const response = await fetch("https://api.openai.com/v1/chat/completions", {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+                    'Authorization': `Bearer ${apiKey}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -148,6 +152,7 @@ export default class ClassroomCSP {
                                 its not necessary to seat all special needs in the same row or in the first seatings, only make sure they sorted based on priority score and if special needs student should be replaced replace him sith the lowest non-special needs student in the first two rows!!
                                 make sure to avoid students if any related information given!
                                 make sure for the most important thing! always check before giving the final matrix if there are no duplicated students**
+                                make sure every student appears once only in the matrix!!
                                 *** Output only the Matrix ***
                                 Return ONLY a 5x8 matrix of student names in this format:
                                 [
