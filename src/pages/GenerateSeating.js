@@ -4,6 +4,7 @@ import { getStudentsByClassID, getQuestionnaireResponses } from "../services/stu
 import { saveGeneratedSeating, fetchExistingSeating } from "../services/seatingHandler";
 import { ThemeContext } from "../App";
 import ClassroomCSP from '../services/CSP';
+import { getApiKey } from '../services/apiService';
 
 const GenerateSeating = ({ teacherId }) => {
  const [classes, setClasses] = useState([]);
@@ -15,10 +16,27 @@ const GenerateSeating = ({ teacherId }) => {
  const { theme } = useContext(ThemeContext);
  const [satisfaction, setSatisfaction] = useState(null);
  const [feedbackText, setFeedbackText] = useState('');
+ const [apiKey, setApiKey] = useState(null);
+ const [error, setError] = useState(null);
+
 
  
 
+useEffect(() => {
+    const fetchApiKey = async () => {
+      try {
+        setLoading(true);
+        const key = await getApiKey();
+        setApiKey(key);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
+    fetchApiKey();
+  }, []);
  // Fetch teacher-specific classes
  useEffect(() => {
  const fetchClasses = async () => {
@@ -111,7 +129,7 @@ const GenerateSeating = ({ teacherId }) => {
 
 //  const scoredStudents = analyzeStudentScores(studentData);
  
-const classroom = new ClassroomCSP(5, 8, studentData);
+const classroom = new ClassroomCSP(5, 8, studentData,apiKey);
 const seating = await classroom.solve(feedback);
 console.log("Seating Arrangement:", seating);
  const seatingMatrix = generateSeatingArrangement(seating);

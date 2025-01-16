@@ -1,32 +1,26 @@
-import {  doc, getDoc } from "firebase/firestore";
 import { db } from "../firebase";
+import { doc, getDoc } from 'firebase/firestore';
 
-
-// Cache the API key in memory
-let cachedApiKey = null;
-
-export const fetchApiKey = async () => {
-    // Return the cached key if it's already fetched
-    if (cachedApiKey) {
-        console.log("Returning cached API key");
-        return cachedApiKey;
+export const getApiKey = async () => {
+  try {
+    // Reference to the apiKey document in the config collection
+    const apiKeyRef = doc(db, 'config', 'apiKey');
+    
+    // Fetch the document
+    const apiKeyDoc = await getDoc(apiKeyRef);
+    
+    if (apiKeyDoc.exists()) {
+      // Return the apiKey field from the document
+      return apiKeyDoc.data().apiKey;
+    } else {
+      throw new Error('API key document not found in Firestore');
     }
+  } catch (error) {
+    console.error('Error fetching API key:', error);
+    throw error;
+  }
+};
 
-    try {
-        console.log("Fetching API key from Firestore");
-        // Reference to the 'config/aapiKey' document
-        const docRef = doc(db, "config", "apiKey");
-        const docSnap = await getDoc(docRef);
-
-        if (docSnap.exists()) {
-            // Store the API key in memory
-            cachedApiKey = docSnap.data().apiKey; // Make sure this matches your field name
-            return cachedApiKey;
-        } else {
-            throw new Error("API Key not found in Firestore");
-        }
-    } catch (error) {
-        console.error("Error fetching API Key:", error);
-        throw error;
-    }
+export default {
+  getApiKey,
 };

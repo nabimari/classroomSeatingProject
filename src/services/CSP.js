@@ -1,6 +1,7 @@
 
 export default class ClassroomCSP {
-    constructor(rows, seatsPerRow, students) {
+    constructor(rows, seatsPerRow, students,apiKey) {
+        this.apiKey=apiKey;
         this.rows = rows;
         this.seatsPerRow = seatsPerRow;
         this.students = students;
@@ -13,12 +14,12 @@ export default class ClassroomCSP {
         this.seating = Array.from({ length: this.rows }, () => Array(this.seatsPerRow).fill(null));
     }
 
-    static async callGPT4Turbo(prompt,feedback="") {
+     async callGPT4Turbo(prompt,feedback="") {
         try {
             const response = await fetch("https://api.openai.com/v1/chat/completions", {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+                    'Authorization': `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
@@ -90,7 +91,7 @@ export default class ClassroomCSP {
     
             
             const gptResponse = student.responses?.["Additional Insights"]?.["Other notes"] 
-            ? await ClassroomCSP.callGPT4Turbo(student.responses["Additional Insights"]["Other notes"]) 
+            ? await this.callGPT4Turbo(student.responses["Additional Insights"]["Other notes"]) 
             : "3, 0, 0";
             // Parse GPT response into scores
             const [behavioralAdjustment, academicSupportAdjustment, requiresAssistance] = gptResponse.split(",").map(str => (!isNaN(str) && str.trim() !== '' ? Number(str) : 0)).concat([0, 0, 0]) // Ensure there are at least 3 elements
@@ -122,7 +123,7 @@ export default class ClassroomCSP {
             const response = await fetch("https://api.openai.com/v1/chat/completions", {
                 method: 'POST',
                 headers: {
-                    'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+                    'Authorization': `Bearer ${this.apiKey}`,
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
