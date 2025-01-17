@@ -274,27 +274,19 @@ export default class ClassroomCSP {
     }
 
     createSeatingMatrix() {
-        this.resetSeating(); // Clear the existing seating arrangement
         
-        // First, create a flat array of all assignments (students followed by nulls)
-        const totalSpaces = this.rows * this.seatsPerRow;
-        const assignments = [...this.students];
-        
-        // Fill remaining spaces with null
-        while (assignments.length < totalSpaces) {
-            assignments.push(null);
-        }
-        
-        // Place assignments into the matrix sequentially
-        let assignmentIndex = 0;
+        const sortedStudents = [...this.students].sort((a, b) => b.score - a.score);
+        const matrix = Array.from({ length: this.rows }, () => Array(this.seatsPerRow).fill(null));
+
+         let index = 0;
         for (let row = 0; row < this.rows; row++) {
-            for (let seat = 0; seat < this.seatsPerRow; seat++) {
-                this.seating[row][seat] = assignments[assignmentIndex];
-                assignmentIndex++;
+            for (let col = 0; col < this.seatsPerRow; col++) {
+                matrix[row][col] = sortedStudents[index];
+                index++;
             }
         }
         
-        return this.seating;
+        return matrix;
     }
 
     // shiftStudentsToFront() {
@@ -327,7 +319,7 @@ export default class ClassroomCSP {
         this.splitByResponses();
         await this.preprocessStudents();
         // this.assignFrontRows();
-        this.createSeatingMatrix();
+        const matrix=this.createSeatingMatrix();
         // this.shiftStudentsToFront();
         
         if(feedback!==""){
@@ -335,7 +327,7 @@ export default class ClassroomCSP {
             this.seating=this.createNewSeatingArrangement(newSeatingString,this.seating);
         }
         console.log(this.seating);
-        return this.seating;
+        return matrix;
     }
 }
 
