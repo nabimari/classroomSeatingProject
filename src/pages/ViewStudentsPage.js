@@ -48,7 +48,11 @@ const ViewStudentsPage = ({ teacherName  }) => {
 
   const handleAddStudent = async (e) => {
     e.preventDefault();
-
+    // Check if the class already has 40 students
+    if (classData.students.length >= 40) {
+        alert("The class has reached its maximum capacity of 40 students. Cannot add more students.");
+       return;
+  }
     if (
       !newStudent.name ||
       !newStudent.age ||

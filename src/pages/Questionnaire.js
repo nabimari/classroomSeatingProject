@@ -30,7 +30,8 @@ const Questionnaire = () => {
 if (
   !responses["Academic Performance"]?.["Rate performance"] ||
   !responses["Behavioral and Social Traits"]?.["Behavior rating"] ||
-  !responses["Special Needs"]?.["Special accommodations"]
+  !responses["Special Needs"]?.["Special accommodations"] ||
+  !responses["Academic Performance"]["Requires assistance?"]
 ) {
   alert("Please fill out all required questions before submitting.");
   return;
@@ -190,7 +191,7 @@ if (
           <h2 style={styles.sectionTitle}>Academic Performance</h2>
           <div style={styles.questionBox}>
             <label style={styles.label}>
-              Rate the student’s academic performance in the subject:
+              Rate the student’s academic performance in the subject: <span style={{ color: "red" ,fontSize:"35px"}}>*</span>
             </label>
             <div style={styles.inputRadioGroup}>
               {["Needs significant support", "Below average", "Average", "Above average", "Exceptional"].map((option) => (
@@ -216,7 +217,7 @@ if (
             </div>
 
             <label style={styles.label}>
-              Does the student require additional academic assistance?
+              Does the student require additional academic assistance? <span style={{ color: "red" ,fontSize:"35px"}}>*</span>
             </label>
             <div style={styles.inputRadioGroup}>
   {["Yes", "No"].map((option) => (
@@ -247,7 +248,8 @@ if (
         <section>
           <h2 style={styles.sectionTitle}>Behavioral and Social Traits</h2>
           <div style={styles.questionBox}>
-            <label style={styles.label}>Rate the student’s behavior in class:</label>
+            <label style={styles.label}>Rate the student’s behavior in class:<span style={{ color: "red" ,fontSize:"35px"}}>*</span>
+            </label>
             <div style={styles.inputRadioGroup}>
   {["Disruptive", "Occasionally disruptive", "Neutral", "Positive influence", "Exemplary behavior"].map((option) => (
     <div key={option} style={styles.radioOption}>
@@ -288,7 +290,7 @@ if (
           <h2 style={styles.sectionTitle}>Special Needs</h2>
           <div style={styles.questionBox}>
             <label style={styles.label}>
-              Does the student have any special needs or accommodations?
+              Does the student have any special needs or accommodations?<span style={{ color: "red" ,fontSize:"35px"}}>*</span>
             </label>
             <div style={styles.inputRadioGroup}>
   {["Yes", "No"].map((option) => (

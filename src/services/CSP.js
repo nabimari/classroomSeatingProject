@@ -14,7 +14,7 @@ export default class ClassroomCSP {
         this.seating = Array.from({ length: this.rows }, () => Array(this.seatsPerRow).fill(null));
     }
 
-     async callGPT4Turbo(prompt,feedback="") {
+     async callGPT4Turbo(prompt) {
         try {
             const response = await fetch("https://api.openai.com/v1/chat/completions", {
                 method: 'POST',
@@ -112,10 +112,20 @@ export default class ClassroomCSP {
                 academicSupportAdjustment,
                 requiresAssistance,
             };
+            if (student.specialNeeds === "Yes") { 
+                if(student.priorityScore>0) {
+
+                    student.priorityScore *= 1.5;
+                }else   {
+                    student.priorityScore +=0.5*((-1)*student.priorityScore);
+                }
+            }
         }
-    
+
+
         // Sort students based on their priority score
         this.students.sort((a, b) => b.priorityScore - a.priorityScore);
+        console.log("in preproccess****",this.students);
     }
     
     async RegenerateSeating(studentMatrix, previousFeedback = "") {
@@ -205,37 +215,7 @@ export default class ClassroomCSP {
     }
 
     
-    placeStudentsSequentially() {
-        // Deep copy the noResponsesStudents array so we can remove from it
-        let remainingStudents = [...this.noResponsesStudents];
-        
-        // Go through each row and column sequentially
-        for (let row = 0; row < 5; row++) {
-            for (let col = 0; col < 8; col++) {
-                // If we find an empty seat and we still have students
-                if (this.seating[row][col] === null && remainingStudents.length > 0) {
-                    // Pick a random student from remaining ones
-                    const randomIndex = Math.floor(Math.random() * remainingStudents.length);
-                    const randomStudent = remainingStudents[randomIndex];
-                    
-                    // Place them in the current empty seat
-                    this.seating[row][col] = randomStudent;
-                    
-                    // Remove this student from the remaining pool
-                    remainingStudents.splice(randomIndex, 1);
-                }
-            }
-        }
-    }
-
-    // Assign students requiring special attention to the front rows
-    // assignFrontRows() {
-    //     for (let student of this.students) {
-    //         if (student.specialNeeds) {
-    //             this.placeStudentInRow(student, [0, 1]); // Front rows
-    //         }
-    //     }
-    // }
+   
 
     // Place a student in specific rows
     placeStudentInRow(student, rows) {
@@ -293,122 +273,52 @@ export default class ClassroomCSP {
         return true;
     }
 
-    // Distribute remaining students evenly
-    distributeRemainingStudents() {
-        for (let student of this.students) {
-            if (!this.placeStudentAnywhere(student)) {
-                console.warn(`Could not place student ${student.id}`);
-            }
+    createSeatingMatrix() {
+        this.resetSeating(); // Clear the existing seating arrangement
+        
+        // First, create a flat array of all assignments (students followed by nulls)
+        const totalSpaces = this.rows * this.seatsPerRow;
+        const assignments = [...this.students];
+        
+        // Fill remaining spaces with null
+        while (assignments.length < totalSpaces) {
+            assignments.push(null);
         }
-    }
- //***************this Algo works but still placing the SN studentts not as prioretyScore******** */
-    
-    rearrangeSpecialNeeds() {
-        // Step 1: Find all special needs students in back rows (2-4)
-        const specialNeedsInBack = [];
-        for (let row = 2; row < this.rows; row++) {
-            for (let seat = 0; seat < this.seatsPerRow; seat++) {
-                const student = this.seating[row][seat];
-                if (student && student.specialNeeds === "Yes") {
-                    specialNeedsInBack.push({
-                        student,
-                        row,
-                        seat
-                    });
-                }
-            }
-        }
-    
-        if (specialNeedsInBack.length === 0) {
-            console.log("No special needs students in back rows to move");
-            return;
-        }
-    
-        // Step 2: Find non-special needs students in front rows (0-1) by priority score
-        const nonSpecialInFront = [];
-        for (let row = 0; row <= 1; row++) {
-            for (let seat = 0; seat < this.seatsPerRow; seat++) {
-                const student = this.seating[row][seat];
-                if (student && student.specialNeeds === "No") {
-                    nonSpecialInFront.push({
-                        student,
-                        row,
-                        seat,
-                        priorityScore: student.priorityScore
-                    });
-                }
-            }
-        }
-    
-        // Sort non-special needs students by priority score (ascending, so lowest priority first)
-        nonSpecialInFront.sort((a, b) => a.priorityScore - b.priorityScore);
-    
-        // Step 3: Perform the swaps
-        for (const specialStudent of specialNeedsInBack) {
-            if (nonSpecialInFront.length === 0) {
-                console.warn("No more available spots in front rows for special needs students");
-                break;
-            }
-    
-            // Get the lowest priority non-special needs student from front
-            const regularStudent = nonSpecialInFront.shift();
-    
-            // Perform the swap
-            const tempStudent = this.seating[regularStudent.row][regularStudent.seat];
-            this.seating[regularStudent.row][regularStudent.seat] = specialStudent.student;
-            this.seating[specialStudent.row][specialStudent.seat] = tempStudent;
-    
-            console.log(`Swapped special needs student from row ${specialStudent.row} with regular student from row ${regularStudent.row}`);
-        }
-    
-        // Step 4: Reorganize back rows (2-4) by priority score
-        for (let row = 2; row < this.rows; row++) {
-            // Collect all students in this row
-            const studentsInRow = [];
-            for (let seat = 0; seat < this.seatsPerRow; seat++) {
-                const student = this.seating[row][seat];
-                if (student) {
-                    studentsInRow.push(student);
-                    this.seating[row][seat] = null;
-                }
-            }
-    
-            // Sort by priority score
-            studentsInRow.sort((a, b) => b.priorityScore - a.priorityScore);
-    
-            // Place them back in the row
-            for (let i = 0; i < studentsInRow.length; i++) {
-                this.seating[row][i] = studentsInRow[i];
-            }
-        }
-    
-        // Final validation
-        let specialNeedsCount = 0;
-        let totalStudents = 0;
-        let specialNeedsInBackAfter = 0;
-    
+        
+        // Place assignments into the matrix sequentially
+        let assignmentIndex = 0;
         for (let row = 0; row < this.rows; row++) {
             for (let seat = 0; seat < this.seatsPerRow; seat++) {
-                const student = this.seating[row][seat];
-                if (student) {
-                    totalStudents++;
-                    if (student.specialNeeds === "Yes") {
-                        specialNeedsCount++;
-                        if (row >= 2) {
-                            specialNeedsInBackAfter++;
-                        }
-                    }
-                }
+                this.seating[row][seat] = assignments[assignmentIndex];
+                assignmentIndex++;
             }
         }
-    
-        console.log(`Final arrangement:`);
-        console.log(`- Total students: ${totalStudents}`);
-        console.log(`- Special needs students: ${specialNeedsCount}`);
-        console.log(`- Special needs students still in back: ${specialNeedsInBackAfter}`);
+        
+        return this.seating;
     }
+
+    // shiftStudentsToFront() {
+    //     // Create a flat array of all students from the matrix
+    //     const allStudents = this.seating.flat().filter(student => student !== null);
+        
+    //     // Reset the matrix
+    //     this.resetSeating();
+        
+    //     // Place students back in sequential order
+    //     let studentIndex = 0;
+    //     for (let row = 0; row < this.rows; row++) {
+    //         for (let seat = 0; seat < this.seatsPerRow; seat++) {
+    //             if (studentIndex < allStudents.length) {
+    //                 this.seating[row][seat] = allStudents[studentIndex];
+    //                 studentIndex++;
+    //             } else {
+    //                 this.seating[row][seat] = null;
+    //             }
+    //         }
+    //     }
+    // }
     
-    
+ 
     
     
     // Solve the seating arrangement
@@ -417,9 +327,8 @@ export default class ClassroomCSP {
         this.splitByResponses();
         await this.preprocessStudents();
         // this.assignFrontRows();
-        this.distributeRemainingStudents();
-        this.rearrangeSpecialNeeds();
-        this.placeStudentsSequentially();
+        this.createSeatingMatrix();
+        // this.shiftStudentsToFront();
         
         if(feedback!==""){
             const newSeatingString=await this.RegenerateSeating(this.seating,feedback);
