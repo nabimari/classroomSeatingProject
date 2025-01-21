@@ -97,7 +97,7 @@ const ViewStudentsPage = ({ teacherName  }) => {
 
   const handleDeleteStudent = async (student) => {
     try {
-      await removeStudent(classId, student.id);
+      await removeStudent(classId, student);
       setClassData((prev) => ({
         ...prev,
         students: prev.students.filter((s) => s.id !== student.id),
