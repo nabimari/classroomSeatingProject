@@ -2,7 +2,7 @@ import React, { useEffect, useState ,useContext} from "react";
 import { useParams } from "react-router-dom";
 import { ThemeContext } from "../App"; // Import ThemeContext
 import {getStudentsByClassID,updateStudentMainInfo,addStudentToClass,removeStudent} from "../services/studentHandler"
-
+import * as XLSX from "xlsx";
 
 
 
@@ -19,6 +19,10 @@ const ViewStudentsPage = ({ teacherName  }) => {
   });
   const { theme } = useContext(ThemeContext); // Access theme
   const [editingStudent, setEditingStudent] = useState(null);
+  const [uploadedFile, setUploadedFile] = useState(null);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+
 
   useEffect(() => {
     const fetchClassData = async () => {
@@ -37,6 +41,64 @@ const ViewStudentsPage = ({ teacherName  }) => {
   
     fetchClassData();
   }, [classId]);
+
+  const handleFileUpload = (e) => {
+    setUploadedFile(e.target.files[0]);
+  };
+  
+  const processUploadedFile = async () => {
+    if (!uploadedFile) {
+      alert("Please select a file before uploading.");
+      return;
+    }
+  
+    try {
+      const fileReader = new FileReader();
+      fileReader.onload = async (event) => {
+        const binaryString = event.target.result;
+  
+        // Use XLSX to parse the file
+        const workbook = XLSX.read(binaryString, { type: "binary" });
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const data = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+  
+        // Skip the header row and map data to student objects
+        const rows = data.slice(1);
+        const students = rows.map(([name, age,language]) => ({
+          name: name?.toString().trim() || "", // Ensure name is a string
+          age: parseInt(age, 10), // Parse age as an integer
+           
+          language: language?.toString().trim() || "", // Ensure language is a string
+        }));
+  
+        // Validate and add each student
+        for (const student of students) {
+          if (!student.name || !student.age || !student.language) {
+            alert("Invalid data: Missing required fields (Name, Age, or Language).");
+            continue;
+          }
+  
+          await addStudentToClass({ ...student, classId });
+          setClassData((prev) => ({
+            ...prev,
+            students: [...prev.students, student],
+          }));
+        }
+  
+        alert("Students added successfully!");
+        setUploadedFile(null); // Clear the uploaded file
+      };
+  
+      fileReader.readAsBinaryString(uploadedFile);
+    } catch (err) {
+      console.error("Error processing file:", err.message);
+      alert("An error occurred while uploading students.");
+    }
+  };
+  
+  
+  
   
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -456,8 +518,119 @@ const ViewStudentsPage = ({ teacherName  }) => {
               >
                 {editingStudent ? "Save Changes" : "Add Student"}
               </button>
+              
             </form>
           </div>
+          <div style={styles.formContainer}>
+          
+  <h3 style={styles.formHeader}>Upload Students</h3>
+  <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+    {/* Question Mark with Tooltip */}
+    <div style={{ position: "relative", display: "flex", alignItems: "center" }}>
+      <div
+        style={{
+          width: "20px",
+          height: "20px",
+          marginTop:"10px",
+          borderRadius: "50%",
+          backgroundColor: "#fff",
+          color: "#000",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: "bold",
+          fontSize: "16px",
+          cursor: "pointer",
+          boxShadow: theme === "light"
+            ? "0 2px 4px rgba(0, 0, 0, 0.2)"
+            : "0 2px 4px rgba(0, 0, 0, 0.5)",
+        }}
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        ?
+      </div>
+      {/* Tooltip */}
+      {showTooltip && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: "120%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            backgroundColor: theme === "light" ? "#f9f9f9" : "#333",
+            color: theme === "light" ? "#333" : "#f9f9f9",
+            padding: "8px 12px",
+            borderRadius: "8px",
+            fontSize: "12px",
+            boxShadow: theme === "light"
+              ? "0 2px 8px rgba(0, 0, 0, 0.1)"
+              : "0 2px 8px rgba(0, 0, 0, 0.5)",
+            whiteSpace: "nowrap",
+            zIndex: 10,
+          }}
+        >
+          Please upload a file in <strong>.csv</strong> or <strong>.xlsx</strong> format.<br />
+    The file should include the following columns:<br />
+    <em>Name, Age, and Language</em>.
+        </div>
+      )}
+    </div>
+
+    {/* Hidden File Input */}
+    <input
+      type="file"
+      accept=".csv, .xlsx"
+      id="fileUpload"
+      onChange={(e) => handleFileUpload(e)}
+      style={{ display: "none" }} // Hide the default file input
+    />
+    {/* Custom File Input Label */}
+    <label
+      htmlFor="fileUpload"
+      style={{
+        marginTop: "10px",
+        padding: "8px 17px",
+        backgroundColor: "#fff",
+        color: "#000",
+        border: "none",
+        borderRadius: "8px",
+        cursor: "pointer",
+        fontSize: "14px",
+        fontWeight: "bold",
+        textAlign: "center",
+        boxShadow: theme === "light"
+          ? "0 4px 8px rgba(0, 0, 0, 0.1)"
+          : "0 4px 8px rgba(0, 0, 0, 0.3)",
+      }}
+    >
+      Choose File
+    </label>
+    {/* Display Selected File Name */}
+    <span
+      style={{
+        fontSize: "18px",
+        color: uploadedFile ? "green" : "red", // Green if file is selected, red if not
+        fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
+      }}
+    >
+      {uploadedFile ? uploadedFile.name : "No File Selected"}
+    </span>
+  </div>
+  <button
+    onClick={processUploadedFile}
+    style={{
+      ...styles.submitButton,
+      backgroundColor: "green",
+      marginTop: "30px",
+      width: "100%",
+    }}
+  >
+    Upload and Add Students
+  </button>
+</div>
+
+
         </>
       ) : (
         <p>Loading class data...</p>

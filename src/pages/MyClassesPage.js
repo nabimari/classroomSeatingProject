@@ -6,9 +6,9 @@ import { getClassesByTeacherID, addNewClass } from "../services/classHandler";
 const MyClassesPage = ({ teacherId, teacherName }) => {
   const [classes, setClasses] = useState([]);
   const { theme } = useContext(ThemeContext); // Access theme
-  const gradeNumbers = Array.from({ length: 12 }, (_, i) => i + 1); 
-const subclassOptions = ["A", "B", "C", "D"];
-const [selectedGrade, setSelectedGrade] = useState("");
+  const grades = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "י\"א", "י\"ב"];
+  const subclassOptions = ["1", "2", "3", "4"];
+  const [selectedGrade, setSelectedGrade] = useState("");
 const [selectedSubclass, setSelectedSubclass] = useState("");
 
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ const [selectedSubclass, setSelectedSubclass] = useState("");
       return;
     }
   
-    const fullClassName = `Grade ${selectedGrade}${selectedSubclass}`;
+    const fullClassName = `כיתה ${selectedGrade} ${selectedSubclass}`;
     try {
       const newClass = await addNewClass(fullClassName, teacherId, teacherName);
       setClasses((prev) => [...prev, newClass]);
@@ -232,9 +232,9 @@ const [selectedSubclass, setSelectedSubclass] = useState("");
     <option value="" disabled>
       Select Grade
     </option>
-    {gradeNumbers.map((grade) => (
+    {grades.map((grade) => (
       <option key={grade} value={grade}>
-        Grade {grade}
+        כיתה {grade}
       </option>
     ))}
   </select>
