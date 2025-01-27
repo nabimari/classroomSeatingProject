@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs,addDoc, doc, setDoc, updateDoc, getDoc, deleteDoc,arrayRemove  } from "firebase/firestore";
+import { collection, query, where, getDocs,addDoc, doc, setDoc, updateDoc, getDoc, deleteDoc } from "firebase/firestore";
 import { db } from "../firebase";
 
 // Get students by class ID
@@ -88,24 +88,13 @@ export const updateStudentMainInfo = async (studentId, updateFields) => {
 };
 
 // Remove a student
-export const removeStudent = async (classId, student) => {
+export const removeStudent = async (studentId) => {
   try {
-    const classRef = doc(db, "Classes", classId);
-    await updateDoc(classRef, {
-      students: arrayRemove(student),
-    });
-
-    const studentQuery = query(collection(db, "Students"), where("id", "==", student.id));
-    const querySnapshot = await getDocs(studentQuery);
-    if (!querySnapshot.empty) {
-      querySnapshot.forEach(async (docSnapshot) => {
-        const studentRef = doc(db, "Students", docSnapshot.id);
-        await deleteDoc(studentRef);
-      });
-    }
-  } catch (error) {
-    console.error("Error removing student:", error.message);
-    throw error;
+    const studentDoc = doc(db, "Students", studentId); // Replace with your collection path
+    await deleteDoc(studentDoc);
+  } catch (err) {
+    console.error("Error deleting student:", err.message);
+    throw err;
   }
 };
 

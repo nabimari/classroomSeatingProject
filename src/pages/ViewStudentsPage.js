@@ -65,11 +65,12 @@ const ViewStudentsPage = ({ teacherName  }) => {
   
         // Skip the header row and map data to student objects
         const rows = data.slice(1);
-        const students = rows.map(([name, age,language]) => ({
+        const students = rows.map(([name, age, language]) => ({
+          id: `${Date.now()}-${Math.random()}`, // Generate unique ID
           name: name?.toString().trim() || "", // Ensure name is a string
           age: parseInt(age, 10), // Parse age as an integer
-           
           language: language?.toString().trim() || "", // Ensure language is a string
+          classId, // Associate with the current class
         }));
   
         // Validate and add each student
@@ -79,7 +80,7 @@ const ViewStudentsPage = ({ teacherName  }) => {
             continue;
           }
   
-          await addStudentToClass({ ...student, classId });
+          await addStudentToClass(student);
           setClassData((prev) => ({
             ...prev,
             students: [...prev.students, student],
@@ -96,6 +97,7 @@ const ViewStudentsPage = ({ teacherName  }) => {
       alert("An error occurred while uploading students.");
     }
   };
+  
   
   
   
@@ -159,14 +161,19 @@ const ViewStudentsPage = ({ teacherName  }) => {
 
   const handleDeleteStudent = async (student) => {
     try {
-      await removeStudent(classId, student);
+      // Call the removeStudent function with the student's id
+      await removeStudent(student.id);
+  
+      // Update the local state to reflect the deletion
       setClassData((prev) => ({
         ...prev,
         students: prev.students.filter((s) => s.id !== student.id),
       }));
+  
       alert("Student deleted successfully!");
     } catch (err) {
       console.error("Error deleting student:", err.message);
+      alert("An error occurred while deleting the student.");
     }
   };
 
