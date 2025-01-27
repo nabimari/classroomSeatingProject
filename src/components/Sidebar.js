@@ -2,7 +2,6 @@ import React, { useContext, useState } from "react";
 import { useNavigate ,useLocation} from "react-router-dom";
 import { logout,getCurrentUser } from "../services/authHandler"; 
 import { ThemeContext } from "../App";
-import { auth } from "../firebase"
 import {
   FaSun,
   FaMoon,

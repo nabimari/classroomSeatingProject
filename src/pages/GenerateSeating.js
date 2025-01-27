@@ -313,46 +313,6 @@ emptyCellStyle: {
   fontStyle: "italic",
   fontWeight: "normal",
 },
-feedbackContainer: {
-  padding: "24px",
-  backgroundColor: "white",
-  borderRadius: "8px",
-  boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
-  maxWidth: "672px",
-  margin: "0 auto"
-},
-
-/* Title styles */
-feedbackTitle: {
-  fontSize: "18px",
-  fontWeight: "600",
-  marginBottom: "16px",
-  color: "#374151"
-},
-
-/* Radio group styles */
-radioGroup: {
-  display: "flex",
-  gap: "24px",
-  marginBottom: "24px"
-},
-
-radioOption: {
-  display: "flex",
-  alignItems: "center"
-},
-
-radioInput: {
-  width: "16px",
-  height: "16px",
-  marginRight: "8px",
-  cursor: "pointer"
-},
-
-radioLabel: {
-  color: "#374151",
-  cursor: "pointer"
-},
 
 feedbackContainer: {
   padding: "24px",
