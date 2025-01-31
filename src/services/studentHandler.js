@@ -42,6 +42,27 @@ export const getStudentById = async (studentId) => {
   }
 };
 
+export const getClassIdByStudentID = async (studentId) => {
+  try {
+    const studentQuery = query(
+      collection(db, "Students"),
+      where("id", "==", studentId)
+    );
+
+    const querySnapshot = await getDocs(studentQuery);
+
+    if (querySnapshot.empty) {
+      throw new Error("Student document not found.");
+    }
+
+    const studentData = querySnapshot.docs[0].data();
+    return studentData.classId || null; // Return classId if exists, otherwise return null
+  } catch (error) {
+    console.error("Error fetching class ID by student ID:", error.message);
+    throw error;
+  }
+};
+
 // Save questionnaire response
 export const saveQuestionnaireResponse = async (studentId, responses) => {
   try {

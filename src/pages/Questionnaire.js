@@ -1,7 +1,7 @@
 import React, { useState,useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App"; 
-import { saveQuestionnaireResponse, updateStudentMainInfo,getStudentById } from "../services/studentHandler";
+import { saveQuestionnaireResponse, updateStudentMainInfo,getStudentById,getStudentsByClassID,getClassIdByStudentID } from "../services/studentHandler";
 
 
 
@@ -47,30 +47,56 @@ const Questionnaire = () => {
       alert("Student ID is missing. Please select a student.");
       return;
     }
-// Validation: Check if all required questions are filled
-if (
-  !responses["Academic Performance"]?.["Rate performance"] ||
-  !responses["Behavioral and Social Traits"]?.["Behavior rating"] ||
-  !responses["Special Needs"]?.["Special accommodations"] ||
-  !responses["Academic Performance"]["Requires assistance?"]
-) {
-  alert("Please fill out all required questions before submitting.");
-  return;
-}
+
+    // Validation: Check if all required questions are filled
+    if (
+      !responses["Academic Performance"]?.["Rate performance"] ||
+      !responses["Behavioral and Social Traits"]?.["Behavior rating"] ||
+      !responses["Special Needs"]?.["Special accommodations"] ||
+      !responses["Academic Performance"]["Requires assistance?"]
+    ) {
+      alert("Please fill out all required questions before submitting.");
+      return;
+    }
+
     try {
       await saveQuestionnaireResponse(studentId, responses);
-    await updateStudentMainInfo(studentId, {
-      academicLevel: responses["Academic Performance"]["Rate performance"],
-      behavior: responses["Behavioral and Social Traits"]["Behavior rating"],
-      specialNeeds: responses["Special Needs"]["Special accommodations"],
-    });
+      await updateStudentMainInfo(studentId, {
+        academicLevel: responses["Academic Performance"]["Rate performance"],
+        behavior: responses["Behavioral and Social Traits"]["Behavior rating"],
+        specialNeeds: responses["Special Needs"]["Special accommodations"],
+      });
 
       alert("Responses saved successfully!");
-      navigate("/show-students");
+
+      // Fetch class ID of the current student
+      const classId = await getClassIdByStudentID(studentId);
+
+      if (!classId) {
+        console.error("Class ID not found.");
+        navigate("/show-students");
+        return;
+      }
+
+      // Fetch all students in the same class
+      const students = await getStudentsByClassID(classId);
+
+      // Find students who haven't submitted a questionnaire yet
+      const unsubmittedStudents = students.filter(student => !student.hasSubmitted && student.id !== studentId);
+
+      if (unsubmittedStudents.length > 0) {
+        // Navigate to the next student's questionnaire
+        navigate(`/questionnaire/${unsubmittedStudents[0].id}`);
+        setResponses({}); // Clear previous responses for the next student
+      } else {
+        // If all questionnaires are submitted, go back to show-students
+        navigate("/show-students");
+      }
     } catch (error) {
       console.error("Error updating document:", error);
     }
   };
+
 
   const styles = {
     container: {
