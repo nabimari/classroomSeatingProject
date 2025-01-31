@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App";
-import { getQuestionnaireResponses ,saveQuestionnaireResponse, updateStudentMainInfo} from "../services/studentHandler";
+import { getQuestionnaireResponses ,getStudentById,saveQuestionnaireResponse, updateStudentMainInfo} from "../services/studentHandler";
 
 
 
@@ -11,12 +11,32 @@ import { getQuestionnaireResponses ,saveQuestionnaireResponse, updateStudentMain
 const ShowQuesResults = () => {
   const { theme } = useContext(ThemeContext);
   const { studentId } = useParams();
+  const [studentName, setStudentName] = useState("");
   const navigate = useNavigate();
   const [responses, setResponses] = useState({});
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
   const [originalResponses, setOriginalResponses] = useState({});
 
+  // Fetch student name on component load
+    useEffect(() => {
+      const fetchStudentName = async () => {
+        try {
+          if (!studentId) return;
+          const studentDoc = await getStudentById(studentId);
+          if (studentDoc.exists()) {
+            const studentData = studentDoc.data();
+            setStudentName(studentData.name || "Unknown Student");
+          } else {
+            console.error("Student data not found.");
+          }
+        } catch (error) {
+          console.error("Error fetching student name:", error);
+        }
+      };
+  
+      fetchStudentName();
+    }, [studentId]);
 
   const questionnaireStructure = {
     "Academic Performance": [
@@ -317,6 +337,9 @@ const ShowQuesResults = () => {
       <div style={styles.sidebarSpacing}></div> {/* Sidebar spacing */}
       <div style={styles.contentArea}>
       <div style={styles.header}>
+      <h2 style={{ textAlign: "center", marginBottom: "20px", fontSize: "22px",color:"green" }}>
+        Student's name:  {studentName}
+      </h2>
         <button
         style={styles.editButton}
         onClick={() => {

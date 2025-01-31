@@ -60,14 +60,23 @@ export default class ClassroomCSP {
         }
     }
     
-    splitByResponses() { // No parameter needed since we're using this.students
-     const withResponses = this.students.filter(obj => obj.responses);
-      this.noResponsesStudents = this.students.filter(obj => !obj.responses); 
-      this.students = withResponses; } // Update the original students array 
+    // splitByResponses() {
+    //     for (let student of this.students) {
+    //         if (!student.responses || Object.keys(student.responses).length === 0) {
+    //             student.priorityScore = -50; // Assign low priority but keep in the list
+    //         }
+    //     }
+    // }
+    
 
 
     async preprocessStudents() {
         for (let student of this.students) {
+            // If the student has no submitted questionnaire or no responses, assign a priority score of -50
+            if (!student.responses || Object.keys(student.responses).length === 0) {
+                student.priorityScore = -50;
+                continue; // Skip further processing for this student
+            }
             // Map academic level responses to scores
             const academicLevelScore = {
                 "Exceptional": 5,
@@ -87,7 +96,7 @@ export default class ClassroomCSP {
             }[student.responses?.behavior || "Neutral"];
     
             // Map assistance field
-            const assistanceScore = student.responses["Academic Performance"]["Requires assistance?"] ? 2 : 0;
+            const assistanceScore = student.responses?.["Academic Performance"]?.["Requires assistance?"] ? 2 : 0;
     
             
             const gptResponse = student.responses?.["Additional Insights"]?.["Other notes"] 
@@ -316,7 +325,7 @@ export default class ClassroomCSP {
     // Solve the seating arrangement
     async solve(feedback="") {
         this.resetSeating();
-        this.splitByResponses();
+        // this.splitByResponses();
         await this.preprocessStudents();
         // this.assignFrontRows();
         const matrix=this.createSeatingMatrix();

@@ -92,7 +92,7 @@ const dynamicPaths = {
       transform: "translateY(-50px)", 
     },
     virtualClassroom: {
-      fontSize: "45px",
+      fontSize: "35px",
       fontWeight: "bold",
       color: "transparent",
       textTransform: "uppercase",
@@ -126,7 +126,7 @@ const dynamicPaths = {
       display: "flex",
       alignItems: "center",
       gap: "15px",
-      padding: "15px 20px",
+      padding: "10px 15px",
       fontSize: "18px",
       fontWeight: "bold",
       borderRadius: "8px",
@@ -146,7 +146,7 @@ const dynamicPaths = {
     transform: "scale(1.05)",
   },
   darkModeToggle: {
-    marginTop: "50px",
+    marginTop: "30px",
     marginLeft : "115px",
     display: "flex",
     alignItems: "center",
@@ -184,7 +184,7 @@ const dynamicPaths = {
       display: "flex",
       alignItems: "center",
       gap: "15px",
-      padding: "15px 20px",
+      padding: "10px 15px",
       fontSize: "18px",
       fontWeight: "bold",
       borderRadius: "8px",
@@ -357,11 +357,12 @@ const dynamicPaths = {
           alt="Logo"
           className="logoAnimation"
           style={{
-            width: "250px",
-            height: "250px",
+            width: "200px",
+            height: "200px",
             objectFit: "cover",
             borderRadius: "50%",
             marginBottom: "-20px",
+            marginTop:"-20px",
         }}
         />
 

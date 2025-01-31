@@ -1,15 +1,36 @@
-import React, { useState, useContext } from "react";
+import React, { useState,useEffect, useContext } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ThemeContext } from "../App"; 
-import { saveQuestionnaireResponse, updateStudentMainInfo } from "../services/studentHandler";
+import { saveQuestionnaireResponse, updateStudentMainInfo,getStudentById } from "../services/studentHandler";
 
 
 
 const Questionnaire = () => {
   const { studentId } = useParams();
+  const [studentName, setStudentName] = useState("");
   const navigate = useNavigate();
   const { theme } = useContext(ThemeContext); // Access dark mode state
   const [responses, setResponses] = useState({});
+
+  // Fetch student name on component load
+      useEffect(() => {
+        const fetchStudentName = async () => {
+          try {
+            if (!studentId) return;
+            const studentDoc = await getStudentById(studentId);
+            if (studentDoc.exists()) {
+              const studentData = studentDoc.data();
+              setStudentName(studentData.name || "Unknown Student");
+            } else {
+              console.error("Student data not found.");
+            }
+          } catch (error) {
+            console.error("Error fetching student name:", error);
+          }
+        };
+    
+        fetchStudentName();
+      }, [studentId]);
 
   const handleInputChange = (section, question, value) => {
     setResponses((prev) => ({
@@ -182,6 +203,9 @@ if (
       <div style={styles.sidebarSpacing}></div> {/* Sidebar Spacing */}
       <div style={styles.contentArea}>
       <div style={styles.innerContainer}>
+      <h2 style={{ textAlign: "center", marginBottom: "20px", fontSize: "22px",color:"green" }}>
+        Student's name:  {studentName}
+      </h2>
         <header style={styles.header}>
           
         </header>
